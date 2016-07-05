@@ -1,0 +1,6 @@
+This variant uses NVIDIAs NVAMG for solving the Sparse problem. Note that NVAMG has to be available. 
+In order to compile gcc 4.7 or later is required. 
+Copy config files from the configs subfolder to NVAMG_CONFIG in order to change the used solver routines from NVAMG.
+Note that the timings reported in the yaml file are not fully correct: The CG Time includes the whole setup of
+the NVAMG library, waxpby and dot product time are essentially zero, because the CG solve is done with a call
+to a solve library.  

@@ -1,0 +1,12 @@
+max_levels=1
+max_iters=100
+presweeps=1
+postsweeps=0
+norm=L2 
+convergence=ABSOLUTE
+tolerance=1e-6
+monitor_residual=1
+print_solve_stats=1
+print_grid_stats=1
+obtain_timings=1
+

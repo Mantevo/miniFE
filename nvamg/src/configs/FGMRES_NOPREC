@@ -1,0 +1,12 @@
+config_version=2 
+solver=FGMRES 
+norm=L2 
+use_scalar_norm=1 
+preconditioner(amg_solver)=NOSOLVER
+tolerance=0.1
+convergence=RELATIVE_INI_CORE
+monitor_residual=1
+print_solve_stats=1
+print_grid_stats=1
+obtain_timings=1
+

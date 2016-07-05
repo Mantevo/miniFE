@@ -1,0 +1,13 @@
+algorithm=AGGREGATION
+selector=SIZE_2
+cycle=V
+smoother=BLOCK_JACOBI
+coarseAgenerator=THRUST
+presweeps=1 
+postsweeps=1 
+max_iters=100
+tolerance=0.1
+monitor_residual=1
+print_solve_stats=1
+print_grid_stats=1
+obtain_timings=1

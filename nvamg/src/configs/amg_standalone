@@ -1,0 +1,41 @@
+config_version=2
+
+
+#gmres accelerator config
+solver(amg)=AMG
+
+#outer solver setup
+amg:convergence=RELATIVE_MAX_CORE
+amg:norm=L2
+amg:use_scalar_norm=1
+amg:max_iters=20
+amg:tolerance=1e-3
+
+#amg specific
+amg:max_iters=1
+amg:algorithm=AGGREGATION
+amg:selector=MULTI_PAIRWISE
+amg:merge_singletons=2
+amg:weight_formula=1
+amg:aggregation_passes=1
+amg:cycle=F
+amg:max_levels=20
+amg:smoother=BLOCK_JACOBI
+amg:presweeps=0
+amg:postsweeps=3
+#amg:error_scaling=3
+amg:max_levels=100
+amg:coarseAgenerator=LOW_DEG
+amg:matrix_coloring_scheme=PARALLEL_GREEDY
+amg:max_uncolored_percentage=0.05
+amg:relaxation_factor=0.5
+amg:coarse_solver=DENSE_LU_SOLVER
+amg:min_coarse_rows=32
+
+
+
+#printing obtions
+amg:print_solve_stats=1
+amg:monitor_residual=1
+amg:obtain_timings=1
+amg:print_grid_stats=1
