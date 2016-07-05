@@ -1,0 +1,50 @@
+
+OBJS = \
+	BoxPartition.o \
+	YAML_Doc.o \
+	YAML_Element.o \
+  CudaUtils.o
+
+UTIL_OBJS = \
+	param_utils.o \
+	utils.o \
+	mytimer.o
+
+MAIN_OBJ = \
+	main.o
+
+MINIFE_INFO = 1
+MINIFE_KERNELS = 0
+
+vpath %.cpp ../utils
+
+all: common_files generate_info miniFE.x 
+
+miniFE.x: $(MAIN_OBJ) $(OBJS) $(UTIL_OBJS) $(OPTIONAL_OBJS) *.hpp *.h
+	$(INSTRUMENT) $(NVCC) -Xcompiler "$(MPICFLAGS)" $(CXXFLAGS) $(CPPFLAGS) $(MAIN_OBJ) $(OBJS) $(UTIL_OBJS) $(OPTIONAL_OBJS) -o miniFE.x $(MPILDFLAGS) $(LDFLAGS) $(OPTIONAL_LIBS) $(LIBS) 
+
+common_files:
+	./get_common_files
+
+generate_info:
+	./generate_info_header "$(CXX)" "$(CXXFLAGS)" "miniFE" "MINIFE"
+
+test:all
+	./run_test
+
+%.o:%.cu *.hpp
+	$(NVCC) -Xcompiler "$(MPICFLAGS)" $(CXXFLAGS) $(CPPFLAGS) $(NVCCFLAGS) -DMINIFE_INFO=$(MINIFE_INFO) -DMINIFE_KERNELS=$(MINIFE_KERNELS) -c $<
+
+%.o:%.cpp *.hpp
+	$(CXX) $(MPICFLAGS) $(CXXFLAGS) $(CPPFLAGS) -DMINIFE_INFO=$(MINIFE_INFO) -DMINIFE_KERNELS=$(MINIFE_KERNELS) -c $<
+
+%.o:%.c *.h
+	$(CC) $(MPICFLAGS) $(CFLAGS) $(CPPFLAGS) -c $<
+
+clean:
+	rm -f *.o *.a *.x *.linkinfo 
+
+realclean: clean
+	rm -f gmon.out gprof.* *~ *.yaml *.TVD.* *.mtx* *.vec* minife_debug*
+
+none:
