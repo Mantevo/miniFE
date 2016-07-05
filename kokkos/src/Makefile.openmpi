@@ -1,0 +1,151 @@
+#-----------------------------------------------------------------------
+SHELL = /bin/sh
+
+MPIPATH = /opt/mpi
+
+
+CXX = mpicxx 
+CC = mpicc
+LINK = mpicxx 
+
+AVX = yes
+MPI = yes
+OMP = yes
+
+ifeq ($(SVN), yes)
+  KOKKOSPATH = /opt/Trilinos/packages/kokkos
+  KOKKOSPATH_INC = $(KOKKOSPATH)
+else
+  #when taking relative paths the include path must be one level further down 
+  #because it starts off in the Obj directory
+  KOKKOSPATH = ../kokkos
+  KOKKOSPATH_INC = ../../kokkos
+endif
+
+HWLOCPATH = ./
+
+PWD = `pwd`
+
+SRC = $(shell ls *.cpp;)
+CPY = $(PWD)/*.cpp
+
+KOKKOS_SRC = $(shell cd $(KOKKOSPATH)/core/src/impl; ls *.cpp;)
+KOKKOS_CPY = $(KOKKOSPATH)/core/src/impl/*.cpp
+
+ifeq ($(OMP),yes)
+KOKKOS_SRC += $(shell cd $(KOKKOSPATH)/core/src/OpenMP; ls *.cpp;)
+KOKKOS_CPY += $(KOKKOSPATH)/core/src/OpenMP/*.cpp
+else
+KOKKOS_SRC += $(shell cd $(KOKKOSPATH)/core/src/Threads; ls *.cpp;)
+KOKKOS_CPY += $(KOKKOSPATH)/core/src/Threads/*.cpp
+endif
+
+MINIFE_TYPES =  \
+        -DMINIFE_SCALAR=double   \
+        -DMINIFE_LOCAL_ORDINAL=int      \
+        -DMINIFE_GLOBAL_ORDINAL=int
+
+MINIFE_MATRIX_TYPE = -DMINIFE_CSR_MATRIX
+# MINIFE_MATRIX_TYPE = -DMINIFE_ELL_MATRIX
+
+#-----------------------------------------------------------------------
+OBJ = $(KOKKOS_SRC:.cpp=.o)
+
+CPPFLAGS = -O3 -I. -I../ -I../../utils -I../../fem $(MINIFE_TYPES) $(MINIFE_MATRIX_TYPE) -DMPICH_IGNORE_CXX_SEEK -I$(KOKKOSPATH_INC)/core/src -I$(KOKKOSPATH_INC)/containers/src -I$(KOKKOSPATH_INC)/linalg/src -fPIC  
+LINKFLAGS = -O3  
+
+ifeq ($(MPI), yes)
+CPPFLAGS += -DHAVE_MPI 
+endif
+
+ifeq ($(AVX), yes)
+CPPFLAGS += -mavx
+LINKFLAGS += -mavx
+endif
+
+ifeq ($(OMP),yes)
+CPPFLAGS += -DKOKKOS_HAVE_OPENMP -fopenmp
+LINKFLAGS += -fopenmp 
+else
+CPPFLAGS += -DKOKKOS_HAVE_PTHREAD 
+USRLIB += -lpthread
+endif
+
+ifeq ($(HWLOC),yes)
+CPPFLAGS += -DKOKKOS_HAVE_HWLOC -I$(HWLOCPATH)/include
+USRLIB += -L$(HWLOCPATH)/lib -lhwloc 
+endif
+
+ifeq ($(ANSI_ALIAS), yes)
+CPPFLAGS += -ansi-alias 
+LINKFLAGS += -ansi-alias
+endif
+
+ifeq ($(DEBUG), yes)
+CPPFLAGS += -g -G -DKOKKOSARRAY_EXPRESSION_CHECK -DENABLE_TRACEBACK
+LINKFLAGS += -g
+endif
+
+ifeq ($(LIBRT),yes)
+CPPFLAGS += -DKOKKOS_USE_LIBRT -DPREC_TIMER
+USRLIB += -lrt
+endif
+
+SYSLIB = $(LIBMPI) $(INTELLIB) $(LIBIB)
+
+
+# For debugging, the macro MINIFE_DEBUG will cause miniFE to dump a log file
+# from each proc containing various information.
+# This macro will also enable a somewhat expensive range-check on indices in
+# the exchange_externals function.
+
+LDFLAGS = $(LINKFLAGS)
+LIBS= $(USRLIB) $(SYSLIB)
+
+# The MPICH_IGNORE_CXX_SEEK macro is required for some mpich versions,
+# such as the one on my cygwin machine.
+
+OBJ += BoxPartition.o YAML_Doc.o YAML_Element.o
+OBJ += param_utils.o utils.o  mytimer.o
+OBJ += main.o
+
+copy: 
+	@if [ ! -d Obj_openmpi ]; then mkdir Obj_openmpi; fi
+	@echo '' > Obj_openmpi/KokkosCore_config.h
+	@cp -p $(SRC) Obj_openmpi
+	@cp -p $(KOKKOS_CPY) Obj_openmpi
+	@cp Makefile.openmpi Obj_openmpi/Makefile
+	@cd Obj_openmpi; ../get_common_files
+	@cd Obj_openmpi; $(MAKE) all "OBJ = $(OBJ)"
+
+
+
+
+MINIFE_INFO = 1
+MINIFE_KERNELS = 0
+
+vpath %.cpp ../../utils
+
+all:generate_info miniFE.openmpi
+
+miniFE.openmpi:$(OBJ) $(MAIN_OBJ) $(OBJS) $(UTIL_OBJS) $(OPTIONAL_OBJS) ../*.hpp generate_info
+	$(INSTRUMENT) $(LINK) $(CXXFLAGS) $(OBJ) $(MAIN_OBJ) $(OBJS) $(UTIL_OBJS) $(OPTIONAL_OBJS) -o ../miniFE.openmpi $(LDFLAGS) $(OPTIONAL_LIBS) $(LIBS)
+
+generate_info:
+	./generate_info_header "$(CXX)" "$(CXXFLAGS)" "miniFE" "MINIFE"
+
+test:
+	./run_test openmpi
+
+%.o:%.cpp *.hpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -DMINIFE_INFO=$(MINIFE_INFO) -DMINIFE_KERNELS=$(MINIFE_KERNELS) -c $<
+
+%.o:%.c *.h
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+
+clean:
+	rm -rf *.o *.a miniFE.openmpi *.linkinfo miniFE_info.hpp Obj_openmpi
+
+realclean: clean
+	rm -f gmon.out gprof.* *~ *.yaml *.TVD.* *.mtx* *.vec* minife_debug*
+  
