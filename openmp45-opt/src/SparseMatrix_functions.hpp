@@ -519,7 +519,6 @@ void operator()(MatrixType& A,
 	MINIFE_GLOBAL_ORDINAL row_end   = 0;
 
         #pragma omp target teams distribute parallel for firstprivate(row_start, row_end)
-        #pragma clang loop vectorize(enable)
         for(MINIFE_LOCAL_ORDINAL row = 0; row < rows_size; ++row) {
                 row_start = Arowoffsets[row];
                 row_end   = Arowoffsets[row+1];
