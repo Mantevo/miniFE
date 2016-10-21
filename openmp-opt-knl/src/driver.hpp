@@ -185,8 +185,8 @@ driver(const Box& global_box, Box& my_box,
   GlobalOrdinal local_nrows = A.rows.size();
   GlobalOrdinal my_first_row = local_nrows > 0 ? A.rows[0] : -1;
 
-  Vector<Scalar,LocalOrdinal,GlobalOrdinal> b(my_first_row, local_nrows);
-  Vector<Scalar,LocalOrdinal,GlobalOrdinal> x(my_first_row, local_nrows);
+  Vector<Scalar,LocalOrdinal,GlobalOrdinal> b(my_first_row, local_nrows, 64);
+  Vector<Scalar,LocalOrdinal,GlobalOrdinal> x(my_first_row, local_nrows, 128);
 
   //Assemble finite-element sub-matrices and sub-vectors into the global
   //linear system:

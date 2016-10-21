@@ -103,9 +103,9 @@ cg_solve(OperatorType& A,
   size_t nrows = A.rows.size();
   LocalOrdinalType ncols = A.num_cols;
 
-  VectorType r(b.startIndex, nrows);
-  VectorType p(0, ncols);
-  VectorType Ap(b.startIndex, nrows);
+  VectorType r(b.startIndex, nrows, 256);
+  VectorType p(0, ncols, 512);
+  VectorType Ap(b.startIndex, nrows, 64);
 
   normr = 0;
   magnitude_type rtrans = 0;

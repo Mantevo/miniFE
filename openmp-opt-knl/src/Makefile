@@ -12,7 +12,7 @@ MINIFE_MATRIX_TYPE = -DMINIFE_CSR_MATRIX
 
 #-----------------------------------------------------------------------
 
-CFLAGS = -O3 -fopenmp -mavx
+CFLAGS = -O3 -fopenmp -xMIC-AVX512
 
 CXXFLAGS = $(CFLAGS) 
 

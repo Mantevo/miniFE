@@ -70,14 +70,15 @@ struct Vector {
   typedef LocalOrdinal LocalOrdinalType;
   typedef GlobalOrdinal GlobalOrdinalType;
 
-  Vector(GlobalOrdinal startIdx, LocalOrdinal local_sz)
+
+  Vector(GlobalOrdinal startIdx, LocalOrdinal local_sz, int offset)
    : startIndex(startIdx),
      local_size(local_sz)
   {
 #ifdef MINIFE_HUGE_PAGES
     coefs = (MINIFE_SCALAR*) malloc_huge_pages((sizeof(MINIFE_SCALAR) * local_size) + 64);
 #else
-    posix_memalign((void**) &coefs, 64, sizeof(MINIFE_SCALAR) * local_size);
+    posix_memalign((void**) &coefs, offset, sizeof(MINIFE_SCALAR) * local_size);
 #endif
 
     if(((unsigned long long int) coefs) % 64 > 0) {
