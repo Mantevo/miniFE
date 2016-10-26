@@ -78,7 +78,9 @@ struct Vector {
 #ifdef MINIFE_HUGE_PAGES
     coefs = (MINIFE_SCALAR*) malloc_huge_pages((sizeof(MINIFE_SCALAR) * local_size) + 64);
 #else
-    posix_memalign((void**) &coefs, offset, sizeof(MINIFE_SCALAR) * local_size);
+//    posix_memalign((void**) &coefs, offset, sizeof(MINIFE_SCALAR) * local_size);
+    posix_memalign((void**) &real_coefs, 2 * 1024 * 1024, (sizeof(MINIFE_SCALAR) * local_size) + offset);
+    coefs = real_coefs + (offset / sizeof(MINIFE_SCALAR));
 #endif
 
     if(((unsigned long long int) coefs) % 64 > 0) {
@@ -101,6 +103,7 @@ struct Vector {
   const LocalOrdinal local_size;
 //  std::vector<Scalar> coefs;
 
+  MINIFE_SCALAR* real_coefs;
   MINIFE_SCALAR* MINIFE_RESTRICT coefs __attribute__ ((aligned (64)));
 };
 
