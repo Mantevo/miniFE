@@ -48,7 +48,7 @@
 #include <YAML_Doc.hpp>
 #include <param_utils.hpp>
 
-#include <qthread.h>
+#include <qthread/qthread.h>
 
 #if MINIFE_INFO != 0
 #include <miniFE_info.hpp>
