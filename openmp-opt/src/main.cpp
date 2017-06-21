@@ -121,6 +121,7 @@ int main(int argc, char** argv) {
 #endif
   if(myproc==0) {
     std::cout << "Counted: " << global_threadcount << " threads." << std::endl;
+    std::cout << "Running on " << numprocs << " ranks, threads/ranks=" << (global_threadcount / numprocs) << std::endl;
     std::cout << "Running MiniFE Mini-App..." << std::endl;
   }
 

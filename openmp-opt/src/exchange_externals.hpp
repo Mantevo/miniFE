@@ -82,6 +82,7 @@ exchange_externals(MatrixType& A,
   int MPI_MY_TAG = 99;
 
   std::vector<MPI_Request>& request = A.request;
+  int nextReqIndex = 0;
 
   //
   // Externals are at end of locals
@@ -89,16 +90,23 @@ exchange_externals(MatrixType& A,
 
   //std::vector<Scalar>& x_coefs = x.coefs;
   MINIFE_SCALAR* x_coefs __attribute__((aligned(64))) = x.coefs;
-  Scalar* x_external = &(x_coefs[local_nrow]);
-
   MPI_Datatype mpi_dtype = TypeTraits<Scalar>::mpi_type();
 
   // Post receives first
+#if defined(MINIFE_MPI_THREAD_MULTIPLE)
+  #pragma omp parallel for
+#endif
   for(int i=0; i<num_neighbors; ++i) {
-    int n_recv = recv_length[i];
-    MPI_Irecv(x_external, n_recv, mpi_dtype, neighbors[i], MPI_MY_TAG,
+	Scalar* x_external = &(x_coefs[local_nrow]);
+
+	for(int j = 0; j < i; ++j) {
+		x_external += recv_length[j];
+	}
+
+	const int n_recv = recv_length[i];
+
+	MPI_Irecv(x_external, n_recv, mpi_dtype, neighbors[i], MPI_MY_TAG,
               MPI_COMM_WORLD, &request[i]);
-    x_external += n_recv;
   }
 
 #ifdef MINIFE_DEBUG
@@ -128,14 +136,19 @@ exchange_externals(MatrixType& A,
   //
   // Send to each neighbor
   //
-
-  Scalar* s_buffer = &send_buffer[0];
-
+#if defined(MINIFE_MPI_THREAD_MULTIPLE)
+  #pragma omp parallel for
+#endif
   for(int i=0; i<num_neighbors; ++i) {
-    int n_send = send_length[i];
-    MPI_Send(s_buffer, n_send, mpi_dtype, neighbors[i], MPI_MY_TAG,
-             MPI_COMM_WORLD);
-    s_buffer += n_send;
+	Scalar* s_buffer = &send_buffer[0];
+
+	for(int j = 0; j < i; ++j) {
+		s_buffer += send_length[j];
+	}
+
+	int n_send = send_length[i];
+
+    	MPI_Send(s_buffer, n_send, mpi_dtype, neighbors[i], MPI_MY_TAG, MPI_COMM_WORLD);
   }
 
 #ifdef MINIFE_DEBUG
@@ -146,13 +159,14 @@ exchange_externals(MatrixType& A,
   // Complete the reads issued above
   //
 
-  MPI_Status status;
-  for(int i=0; i<num_neighbors; ++i) {
-    if (MPI_Wait(&request[i], &status) != MPI_SUCCESS) {
-      std::cerr << "MPI_Wait error\n"<<std::endl;
-      MPI_Abort(MPI_COMM_WORLD, -1);
-    }
-  }
+//  std::vector<MPI_Status> statuses;
+//  for(int i=0; i<num_neighbors; ++i) {
+	MPI_Waitall(num_neighbors, &request[0], MPI_STATUSES_IGNORE);
+//    if (MPI_Wait(&request[i], &status) != MPI_SUCCESS) {
+//      std::cerr << "MPI_Wait error\n"<<std::endl;
+//      MPI_Abort(MPI_COMM_WORLD, -1);
+//    }
+//  }
 
 #ifdef MINIFE_DEBUG
   os << "leaving exchange_externals"<<std::endl;

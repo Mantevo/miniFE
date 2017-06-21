@@ -115,7 +115,17 @@ void broadcast_parameters(Parameters& params)
 void initialize_mpi(int argc, char** argv, int& numprocs, int& myproc)
 {
 #ifdef HAVE_MPI
+#ifdef MINIFE_MPI_THREAD_MULTIPLE
+  int mpi_thr_config = MPI_THREAD_SINGLE;
+  MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &mpi_thr_config);
+
+  if( MPI_THREAD_MULTIPLE != mpi_thr_config ) {
+	fprintf(stderr, "Error: unable to configure MPI for MPI_THREAD_MULTIPLE!\n");
+	exit(-1);
+  }
+#else
   MPI_Init(&argc, &argv);
+#endif
   MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
   MPI_Comm_rank(MPI_COMM_WORLD, &myproc);
 #else
