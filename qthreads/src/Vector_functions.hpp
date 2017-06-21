@@ -41,7 +41,7 @@
 #include <Vector.hpp>
 
 #include <qthread/qloop.h>
-#include <qthread.h>
+#include <qthread/qthread.h>
 #include "qthreads_loop_type.h"
 
 namespace miniFE {
