@@ -1,0 +1,4 @@
+*.o
+miniFE.x
+*.yaml
+miniFE_info.hpp
