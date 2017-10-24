@@ -11,3 +11,7 @@ unstructured implicit finite element or finite volume application, but in 8000 l
 ## License Information
 
 MiniFE is licensed under the LGPL-3. See LICENSE for more information.
+
+## Additional Information
+
+Please see the README.FIRST which accompanies the MiniFE source code.
