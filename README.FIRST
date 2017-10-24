@@ -1,28 +1,33 @@
 
+=======================================================================
+
 README: MiniFE Mantevo Mini-Application
 Github: https://github.com/Mantevo/miniFE
 
-------------------------------------------------------------------------
+=======================================================================
 
 1. Building the MiniFE Mantevo Mini-App
 
-To build MiniFE you should first select which version you want to use for your study. 
-Different implementations are provided by the basic "ref" version was the original code (written
-to use MPI only). Since then, various versions of OpenMP and CUDA have been added. 
+To build MiniFE you should first select which version you want to use
+for your study. Different implementations are provided by the basic
+"ref" version was the original code (written to use MPI only). Since
+then, various versions of OpenMP and CUDA have been added.
 
 You should edit the Makefile found in selected implementation.
 
-As a minimum set the CXX and CC variables to point to your C++ and C compiler respectively.
+As a minimum set the CXX and CC variables to point to your C++ and C
+compiler respectively.
 
-You may need to set additional variable values (for instance, CFLAGS/CXXFLAGS) in order
-to generate optimized code for your platform.
+You may need to set additional variable values (for instance,
+CFLAGS/CXXFLAGS) in order to generate optimized code for your platform.
 
-If you plan to use MPI in your implementation, you must add: "-DHAVE_MPI -DMPICH_IGNORE_CXX_SEEK"
-to your CPPFLAGS, the latter definition is required for MPICH to prevent clashes with C++ headers.
+If you plan to use MPI in your implementation, you must add: "-DHAVE_MPI
+-DMPICH_IGNORE_CXX_SEEK" to your CPPFLAGS, the latter definition is
+required for MPICH to prevent clashes with C++ headers.
 
 To compile without MPI, remove these entries.
 
-------------------------------------------------------------------------
+-----------------------------------------------------------------------
 
 2. Using the MiniFE Mantevo Mini-App
 
@@ -30,47 +35,55 @@ To use the MiniFE mini-application you should run:
 
 ./miniFE.x -nx <X prob> -ny <Y prob> -nz <Z prob>
 
-Where <X/Y/Z prob> is set to the size of each problem dimension. The default problem
-is very small to enable a very quick test. You should *not* use this for performance
-testing.
+Where <X/Y/Z prob> is set to the size of each problem dimension. The
+default problem is very small to enable a very quick test. You should
+*not* use this for performance testing.
 
-------------------------------------------------------------------------
+-----------------------------------------------------------------------
 
 3. Scaling the MiniFE Mantevo Mini-App Problem
 
-To scale the MiniFE problem size, we typically apply the following rules:
+To scale the MiniFE problem size, we typically apply the following
+rules:
 
-(1) Either: double the X dimension for one run, then double the Y-dimension for the
-next run. Keep the Z-dimension fixed. This is useful for some application runs.
+(1) Either: double the X dimension for one run, then double the
+Y-dimension for the next run. Keep the Z-dimension fixed. This is useful
+for some application runs.
 
-(2) Or: define a base problem size (nx * ny * nz) and then use the following equation
-set nz = ny = nz = cbrt( (base_nx * base_ny * base_nz) * (number of MPI ranks) ). This
-is useful for some other application runs.
+(2) Or: define a base problem size (nx * ny * nz) and then use the
+following equation set nz = ny = nz = cbrt( (base_nx * base_ny *
+base_nz) * (number of MPI ranks) ). This is useful for some other
+application runs.
 
-Note - that (1) and (2) create different communication volumes/patterns and execute over
-threaded compute resources. They are both of interest.
+Note - that (1) and (2) create different communication volumes/patterns
+and execute over threaded compute resources. They are both of interest.
 
-------------------------------------------------------------------------
+-----------------------------------------------------------------------
 
 4. Bugs/Issues/Questions with MiniFE?
 
-Please file bugs/issues/questions at: https://github.com/Mantevo/miniFE. This will
-enable the community to search our responses.
+Please file bugs/issues/questions at: https://github.com/Mantevo/miniFE.
+This will enable the community to search our responses.
+
+-----------------------------------------------------------------------
 
 5. Changes to MiniFE?
 
-Please file a pull request using the standard Git procedure at: 
-https://github.com/Mantevo/miniFE. Pull requests will be evaluated and merged
-by the Mantevo developer community.
+Please file a pull request using the standard Git procedure at:
+https://github.com/Mantevo/miniFE. Pull requests will be evaluated and
+merged by the Mantevo developer community.
+
+-----------------------------------------------------------------------
 
 6. Figure of Merit for MiniFE
 
-MiniFE will dump a YAML file at the end of execution. The FOM we are most interested
-in is the MFLOP/s achieved for the CG solve but we have some additional interest in
-the matrix-structure and FE-assembly times reported at the top of the file. The
-CG MFLOP/s are algorithmic FLOP/s and are
-constant over all runs of the same problem size. Users can see the various kernel
-break downs for more information about where time is spent in the main CG kernel.
+MiniFE will dump a YAML file at the end of execution. The FOM we are
+most interested in is the MFLOP/s achieved for the CG solve but we have
+some additional interest in the matrix-structure and FE-assembly times
+reported at the top of the file. The CG MFLOP/s are algorithmic FLOP/s
+and are constant over all runs of the same problem size. Users can see
+the various kernel break downs for more information about where time is
+spent in the main CG kernel.
 
 Matrix structure generation:
   Mat-struc-gen Time: 0.090605
@@ -95,11 +108,15 @@ CG solve:
     Total CG Mflops: 21028.6
   Time per iteration: 0.00327861
 
-Our applications can be different mixes of these parameters. In some cases, we will
-be dominated by CG solve-like kernels (in more complex solvers). The ratio of the CG 
-time to the FE assembly is extreme (e.g. 99:1). For other applications, we more 
-frequently reassemble the matrix and so the ratio of FE-assembly to CG-solve can be
-much lower (users might want to consider relatively few CG iterations as a good
-example of how this might look in larger applications). This means the time breakdown
-between to the kernels is much closer. As an extreme, users might think about 
-FE-assembly time versus say 10 iterations of a CG solve.
+Our applications can be different mixes of these parameters. In some
+cases, we will be dominated by CG solve-like kernels (in more complex
+solvers). The ratio of the CG time to the FE assembly is extreme (e.g.
+99:1). For other applications, we more frequently reassemble the matrix
+and so the ratio of FE-assembly to CG-solve can be much lower (users
+might want to consider relatively few CG iterations as a good example of
+how this might look in larger applications). This means the time
+breakdown between to the kernels is much closer. As an extreme, users
+might think about FE-assembly time versus say 10 iterations of a CG
+solve.
+
+-----------------------------------------------------------------------
