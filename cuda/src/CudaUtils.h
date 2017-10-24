@@ -1,9 +1,12 @@
-#pragma once
+
+#ifndef _H_MINIFE_CUDA_UTILS
+#define _H_MINIFE_CUDA_UTILS
 
 #include <assert.h>
 #include <shfl.h>
+#include <device_atomic_functions.h>
 
-__device__ __inline__ double atomicAdd(double* address, double val)
+__device__ __inline__ double miniFEAtomicAdd(double* address, double val)
 {
     unsigned long long int *address_as_ull = (unsigned long long int*)address;
     unsigned long long int old = *address_as_ull, assumed;
@@ -196,3 +199,5 @@ void Marker() {
 }
 
 }
+
+#endif

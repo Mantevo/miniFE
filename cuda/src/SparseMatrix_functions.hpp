@@ -237,7 +237,7 @@ namespace miniFE {
             else
               coef = elem_diffusion_matrix[elethidx*(2*Hex8::numNodesPerElem-elethidx+1)/2+i-elethidx];
 
-            atomicAdd(&mat_row_coefs[A.pitch*loc],coef);
+            miniFEAtomicAdd(&mat_row_coefs[A.pitch*loc], coef);
             //mat_row_coefs[A.pitch*loc]+=coef;
           }
         }

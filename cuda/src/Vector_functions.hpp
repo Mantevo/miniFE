@@ -93,7 +93,7 @@ void sum_into_vector_cuda(size_t num_indices,
 
     if (idx >= vec.n) continue;
 
-    atomicAdd(&vec.coefs[idx],coefs[i]);
+    miniFEAtomicAdd(&vec.coefs[idx], coefs[i]);
     //vec[idx] += coefs[i];
   }
 }
