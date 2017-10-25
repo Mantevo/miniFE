@@ -520,14 +520,13 @@ void operator()(MatrixType& A,
 		map(to: Arowoffsets[0:A.row_offsets.size()]) \
 		map(to: Acoefs[0:A.packed_coefs.size()]) \
 		map(to: xcoefs[0:x.coefs.size()]) \
-		map(from: ycoefs[0:y.coefs.size()])
+		map(tofrom: ycoefs[0:y.coefs.size()])
         for(MINIFE_GLOBAL_ORDINAL row = 0; row < rows_size; ++row) {
                 const MINIFE_GLOBAL_ORDINAL row_start = Arowoffsets[row];
                 const MINIFE_GLOBAL_ORDINAL row_end   = Arowoffsets[row+1];
 
-                MINIFE_SCALAR sum = 0;
+                MINIFE_SCALAR sum = beta * ycoefs[row];
 
-                #pragma loop_count(15)
                 for(MINIFE_GLOBAL_ORDINAL i = row_start; i < row_end; ++i) {
                         sum += Acoefs[i] * xcoefs[Acols[i]];
                 }
