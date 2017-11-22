@@ -977,6 +977,7 @@ struct MV_MultiplyFunctor {
       }
     }
 
+#ifdef KOKKOS_ENABLE_CUDA
     if(ThreadsPerRow > 1)
       sum += shfl_down(sum, 1,ThreadsPerRow);
     if(ThreadsPerRow > 2)
@@ -987,6 +988,7 @@ struct MV_MultiplyFunctor {
       sum += shfl_down(sum, 8,ThreadsPerRow);
     if(ThreadsPerRow > 16)
       sum += shfl_down(sum, 16,ThreadsPerRow);
+#endif
 
     if (lane == 0) {
       if(doalpha * doalpha != 1) {
@@ -1147,6 +1149,7 @@ struct MV_MultiplyFunctor {
 	  sum -= row.value(iEntry) * m_x(row.colidx(iEntry));
 	}
       }
+#ifdef KOKKOS_ENABLE_CUDA
       if (ThreadsPerRow > 1)
 	sum += shfl_down(sum, 1,ThreadsPerRow);
       if (ThreadsPerRow > 2)
@@ -1157,6 +1160,7 @@ struct MV_MultiplyFunctor {
 	sum += shfl_down(sum, 8,ThreadsPerRow);
       if (ThreadsPerRow > 16)
 	sum += shfl_down(sum, 16,ThreadsPerRow);
+#endif
 
       if (lane == 0) {
 	if (doalpha * doalpha != 1) {
