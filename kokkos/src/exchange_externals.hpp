@@ -47,9 +47,9 @@ template<typename MatrixType,
 struct
 exchange_externals_functor {
 	typedef device_device_type device_type;
-	Kokkos::vector<typename VectorType::ScalarType> _x;
-    Kokkos::vector<typename MatrixType::GlobalOrdinalType> _elements_to_send;
-	Kokkos::vector<typename MatrixType::ScalarType>        _send_buffer;
+	Kokkos::vector<typename VectorType::ScalarType,Kokkos::DefaultExecutionSpace> _x;
+    Kokkos::vector<typename MatrixType::GlobalOrdinalType,Kokkos::DefaultExecutionSpace> _elements_to_send;
+	Kokkos::vector<typename MatrixType::ScalarType,Kokkos::DefaultExecutionSpace>        _send_buffer;
 
 	exchange_externals_functor(const MatrixType& A,
 			const VectorType& x):_x(x.coefs),_elements_to_send(A.elements_to_send),_send_buffer(A.send_buffer) {
@@ -90,12 +90,12 @@ exchange_externals(MatrixType& A,
 
   int local_nrow = A.rows.size();
   int num_neighbors = A.neighbors.size();
-  const Kokkos::vector<LocalOrdinal>& recv_length = A.recv_length;
-  const Kokkos::vector<LocalOrdinal>& send_length = A.send_length;
-  const Kokkos::vector<int>& neighbors = A.neighbors;
-  const Kokkos::vector<GlobalOrdinal>& elements_to_send = A.elements_to_send;
+  const Kokkos::vector<LocalOrdinal,Kokkos::DefaultExecutionSpace>& recv_length = A.recv_length;
+  const Kokkos::vector<LocalOrdinal,Kokkos::DefaultExecutionSpace>& send_length = A.send_length;
+  const Kokkos::vector<int,Kokkos::DefaultExecutionSpace>& neighbors = A.neighbors;
+  const Kokkos::vector<GlobalOrdinal,Kokkos::DefaultExecutionSpace>& elements_to_send = A.elements_to_send;
 
-  Kokkos::vector<Scalar>& send_buffer = A.send_buffer;
+  Kokkos::vector<Scalar,Kokkos::DefaultExecutionSpace>& send_buffer = A.send_buffer;
 
   //
   // first post receives, these are immediate receives
@@ -111,7 +111,7 @@ exchange_externals(MatrixType& A,
   // Externals are at end of locals
   //
 
-  Kokkos::vector<Scalar>& x_coefs = x.coefs;
+  Kokkos::vector<Scalar,Kokkos::DefaultExecutionSpace>& x_coefs = x.coefs;
 #ifndef GPU_MPI
   Scalar* x_external = x_coefs.h_view.ptr_on_device() + local_nrow;
 #else
@@ -150,7 +150,7 @@ exchange_externals(MatrixType& A,
     send_buffer[i] = x.coefs[elements_to_send[i]];
   }*/
   exchange_externals_functor<MatrixType,VectorType> f(A,x);
-  Kokkos::parallel_for(total_to_be_sent,f);
+  Kokkos::parallel_for("exchange_externals",total_to_be_sent,f);
 
   //
   // Send to each neighbor
@@ -222,12 +222,12 @@ begin_exchange_externals(MatrixType& A,
 
   int local_nrow = A.rows.size();
   int num_neighbors = A.neighbors.size();
-  const Kokkos::vector<LocalOrdinal>& recv_length = A.recv_length;
-  const Kokkos::vector<LocalOrdinal>& send_length = A.send_length;
-  const Kokkos::vector<int>& neighbors = A.neighbors;
-  const Kokkos::vector<GlobalOrdinal>& elements_to_send = A.elements_to_send;
+  const Kokkos::vector<LocalOrdinal,Kokkos::DefaultExecutionSpace>& recv_length = A.recv_length;
+  const Kokkos::vector<LocalOrdinal,Kokkos::DefaultExecutionSpace>& send_length = A.send_length;
+  const Kokkos::vector<int,Kokkos::DefaultExecutionSpace>& neighbors = A.neighbors;
+  const Kokkos::vector<GlobalOrdinal,Kokkos::DefaultExecutionSpace>& elements_to_send = A.elements_to_send;
 
-  Kokkos::vector<Scalar> send_buffer(elements_to_send.size(), 0);
+  Kokkos::vector<Scalar,Kokkos::DefaultExecutionSpace> send_buffer(elements_to_send.size(), 0);
 
   //
   // first post receives, these are immediate receives
@@ -243,7 +243,7 @@ begin_exchange_externals(MatrixType& A,
   // Externals are at end of locals
   //
 
-  Kokkos::vector<Scalar>& x_coefs = x.coefs;
+  Kokkos::vector<Scalar,Kokkos::DefaultExecutionSpace>& x_coefs = x.coefs;
   Scalar* x_external = &(x_coefs[local_nrow]);
 
   MPI_Datatype mpi_dtype = TypeTraits<Scalar>::mpi_type();

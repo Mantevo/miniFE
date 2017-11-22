@@ -80,7 +80,7 @@ make_local_matrix(MatrixType& A)
   ///////////////////////////////////////////
   // Scan the indices and transform to local
   ///////////////////////////////////////////
-  Kokkos::vector<GlobalOrdinal>& external_index = A.external_index;
+  Kokkos::vector<GlobalOrdinal,Kokkos::DefaultExecutionSpace>& external_index = A.external_index;
 
   for(size_t i=0; i<A.rows.size(); ++i) {
     GlobalOrdinal* Acols = NULL;
@@ -107,11 +107,11 @@ make_local_matrix(MatrixType& A)
   // Go through list of externals to find out which processors must be accessed.
   ////////////////////////////////////////////////////////////////////////
 
-  Kokkos::vector<GlobalOrdinal> tmp_buffer(numprocs, 0); // Temp buffer space needed below
+  Kokkos::vector<GlobalOrdinal,Kokkos::DefaultExecutionSpace> tmp_buffer(numprocs, 0); // Temp buffer space needed below
 
   // Build list of global index offset
 
-  Kokkos::vector<GlobalOrdinal> global_index_offsets(numprocs, 0);
+  Kokkos::vector<GlobalOrdinal,Kokkos::DefaultExecutionSpace> global_index_offsets(numprocs, 0);
 
   tmp_buffer[myproc] = start_row; // This is my start row
 
@@ -127,7 +127,7 @@ make_local_matrix(MatrixType& A)
                 MPI_SUM, MPI_COMM_WORLD);
 
   // Go through list of externals and find the processor that owns each
-  Kokkos::vector<int> external_processor(num_external);
+  Kokkos::vector<int,Kokkos::DefaultExecutionSpace> external_processor(num_external);
 
   for(LocalOrdinal i=0; i<num_external; ++i) {
     GlobalOrdinal cur_ind = external_index[i];
@@ -148,7 +148,7 @@ make_local_matrix(MatrixType& A)
   /////////////////////////////////////////////////////////////////////////
 
   size_t count = local_nrow;
-  Kokkos::vector<GlobalOrdinal>& external_local_index = A.external_local_index;
+  Kokkos::vector<GlobalOrdinal,Kokkos::DefaultExecutionSpace>& external_local_index = A.external_local_index;
   external_local_index.on_host();
   external_local_index.assign(num_external, -1);
 
@@ -177,7 +177,7 @@ make_local_matrix(MatrixType& A)
     }
   }
 
-  Kokkos::vector<int> new_external_processor(num_external, 0);
+  Kokkos::vector<int,Kokkos::DefaultExecutionSpace> new_external_processor(num_external, 0);
 
   for(int i=0; i<num_external; ++i) {
     new_external_processor[external_local_index[i]-local_nrow] =
@@ -196,7 +196,7 @@ make_local_matrix(MatrixType& A)
   ///
   ////////////////////////////////////////////////////////////////////////
 
-  Kokkos::vector<GlobalOrdinal> tmp_neighbors(numprocs, 0);
+  Kokkos::vector<GlobalOrdinal,Kokkos::DefaultExecutionSpace> tmp_neighbors(numprocs, 0);
 
   int num_recv_neighbors = 0;
   int length             = 1;
@@ -231,7 +231,7 @@ make_local_matrix(MatrixType& A)
   ///
   ///////////////////////////////////////////////////////////////////////
 
-  Kokkos::vector<int> recv_list;
+  Kokkos::vector<int,Kokkos::DefaultExecutionSpace> recv_list;
   recv_list.push_back(new_external_processor[0]);
 
   for(LocalOrdinal i=1; i<num_external; ++i) {
@@ -244,7 +244,7 @@ make_local_matrix(MatrixType& A)
   // Send a 0 length message to each of our recv neighbors
   //
 
-  Kokkos::vector<int> send_list(num_send_neighbors, 0);
+  Kokkos::vector<int,Kokkos::DefaultExecutionSpace> send_list(num_send_neighbors, 0);
 
   //
   // first post receives, these are immediate receives
@@ -308,7 +308,7 @@ make_local_matrix(MatrixType& A)
   // order given by 'external_local_index'
   //
 
-  Kokkos::vector<GlobalOrdinal> new_external(num_external);
+  Kokkos::vector<GlobalOrdinal,Kokkos::DefaultExecutionSpace> new_external(num_external);
   for(LocalOrdinal i=0; i<num_external; ++i) {
     new_external[external_local_index[i] - local_nrow] = external_index[i];
   }
@@ -320,7 +320,7 @@ make_local_matrix(MatrixType& A)
   //
   /////////////////////////////////////////////////////////////////////////
 
-  Kokkos::vector<int> lengths(num_recv_neighbors);
+  Kokkos::vector<int,Kokkos::DefaultExecutionSpace> lengths(num_recv_neighbors);
 
   ++MPI_MY_TAG;
 
@@ -332,9 +332,9 @@ make_local_matrix(MatrixType& A)
               &request[i]);
   }
 
-  Kokkos::vector<int>& neighbors = A.neighbors;
-  Kokkos::vector<int>& recv_length = A.recv_length;
-  Kokkos::vector<int>& send_length = A.send_length;
+  Kokkos::vector<int,Kokkos::DefaultExecutionSpace>& neighbors = A.neighbors;
+  Kokkos::vector<int,Kokkos::DefaultExecutionSpace>& recv_length = A.recv_length;
+  Kokkos::vector<int,Kokkos::DefaultExecutionSpace>& send_length = A.send_length;
 
   neighbors.resize(num_recv_neighbors, 0);
   A.request.resize(num_recv_neighbors);

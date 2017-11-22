@@ -100,7 +100,7 @@ void get_hex8_node_coords_3d(Scalar x, Scalar y, Scalar z,
 }
 
 template<typename GlobalOrdinal, typename Scalar>
-KOKKOS_INLINE_FUNCTION
+inline
 void
 get_elem_nodes_and_coords(const simple_mesh_description<GlobalOrdinal>& mesh,
                           GlobalOrdinal elemID,
@@ -161,7 +161,7 @@ get_elem_nodes_and_coords(const simple_mesh_description<GlobalOrdinal>& mesh,
 }
 
 template<typename GlobalOrdinal, typename Scalar>
-KOKKOS_INLINE_FUNCTION
+inline
 void
 get_elem_nodes_and_coords(const simple_mesh_description<GlobalOrdinal>& mesh,
                           GlobalOrdinal elemID,
