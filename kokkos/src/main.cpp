@@ -68,7 +68,7 @@
 // ************************************************************************
 
 void add_params_to_yaml(YAML_Doc& doc, miniFE::Parameters& params);
-void add_configuration_to_yaml(YAML_Doc& doc, int numprocs, int numthreads);
+void add_configuration_to_yaml(YAML_Doc& doc, int numprocs);
 void add_timestring_to_yaml(YAML_Doc& doc);
 
 //
@@ -82,37 +82,11 @@ int main(int argc, char** argv) {
   miniFE::Parameters params;
   miniFE::get_parameters(argc, argv, params);
 
-#ifdef KOKKOS_HAVE_CUDA
-  char* str;
-  int dev_count, device = params.device, local_rank = 0;
-  if((str = getenv("SLURM_LOCALID")) != NULL) {
-    local_rank = atoi(str);
-    device = local_rank % params.num_devices;
-    if(device >= params.skip_device) device++;
-  }
-  
-  if((str = getenv("MV2_COMM_WORLD_LOCAL_RANK")) != NULL) {
-    cudaGetDeviceCount(&dev_count);
-    local_rank = atoi(str);
-    device = local_rank % params.num_devices;
-
-    if(device >= params.skip_device) device++;
-  }
-  if((str = getenv("OMPI_COMM_WORLD_LOCAL_RANK")) != NULL) {
-    cudaGetDeviceCount(&dev_count);
-    local_rank = atoi(str);
-    device = local_rank % params.num_devices;
-
-    if(device >= params.skip_device) device++;
-  }
-
-  Kokkos::Cuda::host_mirror_device_type::initialize(params.numa,params.numthreads);
-  Kokkos::Cuda::SelectDevice select_device(device);
-  Kokkos::Cuda::initialize(select_device);
-#endif
-
   int numprocs = 1, myproc = 0;
   miniFE::initialize_mpi(argc, argv, numprocs, myproc);
+
+  Kokkos::initialize(argc,argv);
+
   if(myproc==0) {
     std::cout << "MiniFE Mini-App, Kokkos Peer Implementation" << std::endl;
   }
@@ -125,10 +99,6 @@ int main(int argc, char** argv) {
 
   //make sure each processor has the same parameters:
   miniFE::broadcast_parameters(params);
-
-#ifndef KOKKOS_HAVE_CUDA
-  device_device_type::initialize(params.numa,params.numthreads);
-#endif
 
   Box global_box = { 0, params.nx, 0, params.ny, 0, params.nz };
   std::vector<Box> local_boxes(numprocs);
@@ -164,7 +134,7 @@ int main(int argc, char** argv) {
   YAML_Doc doc("miniFE", MINIFE_VERSION, ".", osstr.str());
   if (myproc == 0) {
     add_params_to_yaml(doc, params);
-    add_configuration_to_yaml(doc, numprocs, params.numthreads);
+    add_configuration_to_yaml(doc, numprocs);
     add_timestring_to_yaml(doc);
   }
 
@@ -183,10 +153,9 @@ int main(int argc, char** argv) {
     doc.add("Total Program Time",total_time);
     doc.generateYAML();
   }
-#ifdef KOKKOS_HAVE_CUDA
-  host_device_type::finalize();
-#endif
-  device_device_type::finalize();
+
+  Kokkos::finalize();
+
   miniFE::finalize_mpi();
 
   return return_code;
@@ -210,7 +179,7 @@ void add_params_to_yaml(YAML_Doc& doc, miniFE::Parameters& params)
   }
 }
 
-void add_configuration_to_yaml(YAML_Doc& doc, int numprocs, int numthreads)
+void add_configuration_to_yaml(YAML_Doc& doc, int numprocs)
 {
   doc.get("Global Run Parameters")->add("number of processors", numprocs);
 

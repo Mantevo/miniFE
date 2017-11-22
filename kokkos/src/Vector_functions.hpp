@@ -95,7 +95,7 @@ void sum_into_vector(size_t num_indices,
   GlobalOrdinal first = vec.startIndex;
   GlobalOrdinal last = first + vec.local_size - 1;
 
-  Kokkos::vector<Scalar>& vec_coefs = vec.coefs;
+  Kokkos::vector<Scalar,Kokkos::DefaultExecutionSpace>& vec_coefs = vec.coefs;
 
   for(size_t i=0; i<num_indices; ++i) {
     if (indices[i] < first || indices[i] > last) continue;

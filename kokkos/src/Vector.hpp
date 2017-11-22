@@ -64,7 +64,7 @@ struct Vector {
 
   GlobalOrdinal startIndex;
   LocalOrdinal local_size;
-  Kokkos::vector<Scalar> coefs;
+  Kokkos::vector<Scalar,Kokkos::DefaultExecutionSpace> coefs;
 };
 
 

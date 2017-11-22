@@ -57,7 +57,7 @@ struct perform_element_loop_functor {
      // ElemData<GlobalOrdinal,Scalar> _elem_data;
 	  //--------------------------------------------------------------------------
 
-	  KOKKOS_INLINE_FUNCTION
+	  inline
 	  void operator()( const int i ) const
 	  {
 	        ElemData<GlobalOrdinal,Scalar> elem_data;// = _elem_data;
@@ -116,7 +116,7 @@ perform_element_loop(const simple_mesh_description<GlobalOrdinal>& mesh,
   compute_gradient_values(elem_data.grad_vals);
 
   struct perform_element_loop_functor<GlobalOrdinal, MatrixType,VectorType> f(&A,&b,mesh,h_elemIDs,elem_data);
-  Kokkos::parallel_for(h_elemIDs.dimension_0(),f);
+  Kokkos::parallel_for("perform_element_loop<Host>",h_elemIDs.dimension_0(),f);
   device_device_type::fence();
 }
 

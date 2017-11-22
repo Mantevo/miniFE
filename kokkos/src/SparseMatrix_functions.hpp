@@ -200,7 +200,6 @@ sum_in_symm_elem_matrix(size_t num,
 //std::cout<<std::endl;
 
   int row_offset = 0;
-  bool flag = false;
   for(size_t i=0; i<num; ++i) {
     GlobalOrdinal row = indices[i];
  
@@ -449,7 +448,7 @@ struct impose_dirichlet_functorA {
 	                      {}
 	  //--------------------------------------------------------------------------
 
-	  KOKKOS_INLINE_FUNCTION
+	  inline
 	  void operator()( const int i ) const
 	  {
 		  GlobalOrdinal first_local_row = _A.rows.size()>0 ? _A.rows[0] : 0;
@@ -481,7 +480,7 @@ struct impose_dirichlet_functorB {
 	                      {}
 	  //--------------------------------------------------------------------------
 
-	  KOKKOS_INLINE_FUNCTION
+	  inline
 	  void operator()( const int i ) const
 	  {
 		    GlobalOrdinal row = _A.rows[i];
@@ -523,11 +522,11 @@ impose_dirichlet(typename MatrixType::ScalarType prescribed_value,
   GlobalOrdinal last_local_row  = A.rows.size()>0 ? A.rows[A.rows.size()-1] : -1;
 
   impose_dirichlet_functorA<MatrixType,VectorType,typename MatrixType::HostMirror::device_type> fA(prescribed_value,A,b,bc_rows);
-  Kokkos::parallel_for(bc_rows.size(),fA);
+  Kokkos::parallel_for("impose_dirichlet_A<Host>",bc_rows.size(),fA);
   MatrixType::device_type::fence();
 
   impose_dirichlet_functorB<MatrixType,VectorType,typename MatrixType::HostMirror::device_type> fB(prescribed_value,A,b,bc_rows);
-  Kokkos::parallel_for(A.rows.size(),fB);
+  Kokkos::parallel_for("impose_dirichlet_B<Host>",A.rows.size(),fB);
   MatrixType::device_type::fence();
 }
 

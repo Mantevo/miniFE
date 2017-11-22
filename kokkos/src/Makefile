@@ -1,21 +1,16 @@
 #-----------------------------------------------------------------------
 SHELL = /bin/sh
 
-MPIPATH = /opt/mpi
-
-
 CXX = mpicxx 
 CC = mpicc
 LINK = mpicxx 
 
-#Note: when using absolute paths KOKKOSPATH and KOKKOSPATH_INC should be the same
-#KOKKOSPATH is using for copying source files into the Object directory
-#KOKKOSPATH_INC is used during the actual compilation
-KOKKOSPATH = ../kokkos
-KOKKOSPATH_INC = ../../kokkos
+# Kokkos Settings:
 
-PWD = `pwd`
+KOKKOS_DEVICES = OpenMP
+KOKKOS_ARCH = SNB
 
+# MiniFE Settings:
 MINIFE_TYPES =  \
 	-DMINIFE_SCALAR=double   \
 	-DMINIFE_LOCAL_ORDINAL=int      \
@@ -23,101 +18,73 @@ MINIFE_TYPES =  \
 
 MINIFE_MATRIX_TYPE = -DMINIFE_CSR_MATRIX
 # MINIFE_MATRIX_TYPE = -DMINIFE_ELL_MATRIX
- 
-CPPFLAGS = -O3 -I. -mavx -I../ -I../../utils -I../../fem $(MINIFE_TYPES) $(MINIFE_MATRIX_TYPE) -DMPICH_IGNORE_CXX_SEEK -I$(KOKKOSPATH_INC)/core/src -I$(KOKKOSPATH_INC)/containers/src -I$(KOKKOSPATH_INC)/linalg/src -fPIC 
-LINKFLAGS = -O3 -mavx   
-
-#Use MPI
-CPPFLAGS += -DHAVE_MPI -I$(MPIPATH)/include
-
-##Enable DEBUG
-#CPPFLAGS += -g -G -DKOKKOSARRAY_EXPRESSION_CHECK -DENABLE_TRACEBACK
-#LINKFLAGS += -g
-
-#Enable Single Precision
-#CPPFLAGS += -DPRECISION=1
-
-SRC = $(shell ls *.cpp;)
-CPY = $(PWD)/*.cpp
-
-KOKKOS_SRC = $(shell cd $(KOKKOSPATH)/core/src/impl; ls *.cpp;)
-KOKKOS_CPY = $(KOKKOSPATH)/core/src/impl/*.cpp
-
-#Use OpenMP backend
-KOKKOS_SRC += $(shell cd $(KOKKOSPATH)/core/src/OpenMP; ls *.cpp;)
-KOKKOS_CPY += $(KOKKOSPATH)/core/src/OpenMP/*.cpp
-CPPFLAGS += -DKOKKOS_HAVE_OPENMP -fopenmp
-LINKFLAGS += -fopenmp 
-
-##Use PThreads Backend
-#KOKKOS_SRC += $(shell cd $(KOKKOSPATH)/core/src/Threads; ls *.cpp;)
-#KOKKOS_CPY += $(KOKKOSPATH)/core/src/Threads/*.cpp
-#CPPFLAGS += -DKOKKOS_HAVE_PTHREAD 
-#USRLIB += -lpthread
-
-##Use HWLOC
-#HWLOCPATH = ./
-#CPPFLAGS += -DKOKKOS_HAVE_HWLOC -I$(HWLOCPATH)/include
-#USRLIB += -L$(HWLOCPATH)/lib -lhwloc 
-
-#-----------------------------------------------------------------------
-OBJ = $(KOKKOS_SRC:.cpp=.o)
-
-SYSLIB = $(LIBMPI) $(INTELLIB) $(LIBIB)
-
-
-# For debugging, the macro MINIFE_DEBUG will cause miniFE to dump a log file
-# from each proc containing various information.
-# This macro will also enable a somewhat expensive range-check on indices in
-# the exchange_externals function.
-
-LDFLAGS = $(LINKFLAGS)
-LIBS= $(USRLIB) $(SYSLIB)
-
-# The MPICH_IGNORE_CXX_SEEK macro is required for some mpich versions,
-# such as the one on my cygwin machine.
-
-
-copy: 
-	@if [ ! -d Obj ]; then mkdir Obj; fi
-	@echo '' > Obj/KokkosCore_config.h
-	@cp -p $(SRC) Obj
-	@cp -p $(KOKKOS_CPY) Obj
-	@cp Makefile Obj/Makefile
-	@cd Obj; ../get_common_files
-	@cd Obj; $(MAKE) all "OBJ = $(OBJ)"
-
-
-OBJ += BoxPartition.o YAML_Doc.o YAML_Element.o
-OBJ += param_utils.o utils.o  mytimer.o
-OBJ += main.o
-
 
 MINIFE_INFO = 1
 MINIFE_KERNELS = 0
 
-vpath %.cpp ../../utils
+
+#PATHS
+
+MAKEFILE_PATH := $(subst Makefile,,$(abspath $(lastword $(MAKEFILE_LIST))))
+
+MINIFE_PATH = ${MAKEFILE_PATH}..
+
+KOKKOS_PATH ?= ../kokkos
+KOKKOS_PATH_INC ?= ${KOKKOS_PATH}
 
 all:generate_info miniFE.x
 
-miniFE.x:$(OBJ) $(MAIN_OBJ) $(OBJS) $(UTIL_OBJS) $(OPTIONAL_OBJS) ../*.hpp generate_info
-	$(INSTRUMENT) $(LINK) $(CXXFLAGS) $(OBJ) $(MAIN_OBJ) $(OBJS) $(UTIL_OBJS) $(OPTIONAL_OBJS) -o ../miniFE.x $(LDFLAGS) $(OPTIONAL_LIBS) $(LIBS)
+CXXFLAGS = -O3 
 
-generate_info:
-	./generate_info_header "$(CXX)" "$(CXXFLAGS)" "miniFE" "MINIFE"
+LDFLAGS = -O3   
+
+
+MINIFE_INCLUDES  = -I./ -I${MINIFE_PATH} -I${MINIFE_PATH}/src -I${MINIFE_PATH}/kokkos/linalg/src 
+MINIFE_INCLUDES += -I${MINIFE_PATH}/fem -I${MINIFE_PATH}/utils -I${MINIFE_PATH}/common
+override CXXFLAGS += -DMPICH_IGNORE_CXX_SEEK -fPIC $(MINIFE_TYPES) $(MINIFE_MATRIX_TYPE) ${MINIFE_INCLUDES}  
+override CXXFLAGS += -DMINIFE_INFO=$(MINIFE_INFO) -DMINIFE_KERNELS=$(MINIFE_KERNELS) -DUSE_MPI_WTIME
+
+#Use MPI
+override CXXFLAGS += -DHAVE_MPI
+
+include $(KOKKOS_PATH)/Makefile.kokkos
+
+#Enable Single Precision
+#override CXXFLAGS += -DPRECISION=1
+
+SRC = $(wildcard $(MINIFE_PATH)/src/*.cpp)
+SRC += $(MINIFE_PATH)/common/YAML_Doc.cpp $(MINIFE_PATH)/common/YAML_Element.cpp
+SRC += $(wildcard $(MINIFE_PATH)/utils/*.cpp)
+
+HEADERS = $(wildcard $(MAKEFILE_PATH)/src/*.hpp)
+HEADERS += $(MINIFE_PATH)/common/YAML_Doc.hpp $(MINIFE_PATH)/common/YAML_Element.hpp
+HEADERS += $(wildcard $(MINIFE_PATH)/utils/*.hpp)
+
+vpath %.cpp $(sort $(dir $(SRC)))
+
+$(warning $(SRC))
+OBJ = $(notdir $(SRC:.cpp=.o))
+$(warning $(OBJ))
+$(warning $(HEADERS))
+$(warning $(KOKKOS_PATH))
+$(warning $(KOKKOS_CPPFLAGS))
+
+generate_info: 
+	@${MINIFE_PATH}/common/generate_info_header "$(CXX)" "$(CXXFLAGS)" "miniFE" "MINIFE"
+	
+
+miniFE.x:$(OBJ) $(KOKKOS_LINK_DEPENDS) generate_info $(HEADERS)
+	$(INSTRUMENT) $(LINK) $(LDFLAGS) $(KOKKOS_LDFLAGS) $(OBJ) $(KOKKOS_LIBS) -o miniFE.x
 
 test:
 	./run_test x
-
-%.o:%.cpp *.hpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -DMINIFE_INFO=$(MINIFE_INFO) -DMINIFE_KERNELS=$(MINIFE_KERNELS) -c $<
-
-%.o:%.c *.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
 clean:
 	rm -rf *.o *.a miniFE.x *.linkinfo miniFE_info.hpp Obj
 
 realclean: clean
 	rm -f gmon.out gprof.* *~ *.yaml *.TVD.* *.mtx* *.vec* minife_debug*
+  
+%.o:%.cpp $(KOKKOS_CPP_DEPENDS) $(HEADERS)
+	$(CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(CXXFLAGS) -c $< -o $(notdir $@)
   

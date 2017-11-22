@@ -104,7 +104,7 @@ struct generate_matrix_structure_functor {
 		  box_dims[2] = box[2][1] - box[2][0];
 	}
 
-	KOKKOS_INLINE_FUNCTION
+	inline
 	void operator() (const int &roffset) const{
 		  int iz = roffset/(box_dims[1]*box_dims[0]) + box[2][0];
 		  int iy = (roffset/box_dims[0])%box_dims[1] + box[1][0];
@@ -149,7 +149,7 @@ generate_matrix_structure(const simple_mesh_description<typename MatrixType::Glo
   try {
   struct generate_matrix_structure_functor<MatrixType,host_device_type> functor(mesh,&A);
 
-  Kokkos::parallel_for(functor.box_dims[0]*functor.box_dims[1]*functor.box_dims[2],functor);
+  Kokkos::parallel_for("generate_matrix_structure<Host>",functor.box_dims[0]*functor.box_dims[1]*functor.box_dims[2],functor);
   host_device_type::fence();
 
   for(int i=0;i<functor.row_offsets.size()-1;i++) {

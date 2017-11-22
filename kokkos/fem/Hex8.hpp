@@ -282,8 +282,6 @@ KERNEL_PREFIX void diffusionMatrix_symm(const Scalar* elemNodeCoords,
   //Dynamics", 2nd edition,
   //to compute the element diffusion matrix for the steady conduction equation.
 
-  Scalar pt[spatialDim];
-
 #ifdef MINIFE_DEBUG
   Scalar volume = zero;
 #endif
