@@ -16,7 +16,7 @@ MINIFE_MATRIX_TYPE = -DMINIFE_CSR_MATRIX
 
 #-----------------------------------------------------------------------
 
-OPENMP=-qopenmp
+OPENMP=-fopenmp
 CFLAGS = -O3 $(OPENMP) -restrict -mavx
 CXXFLAGS = $(CFLAGS)
 
