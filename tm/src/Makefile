@@ -15,7 +15,7 @@ MINIFE_MATRIX_TYPE = -DMINIFE_CSR_MATRIX
 
 #-----------------------------------------------------------------------
 
-CFLAGS = -O3 -fopenmp
+CFLAGS = -O3 -fopenmp -xcore-avx512
 CXXFLAGS = $(CFLAGS)
 
 CPPFLAGS = -I. -I../utils -I../fem $(MINIFE_TYPES) \

@@ -28,6 +28,8 @@
 // ************************************************************************
 //@HEADER
 
+#include <immintrin.h>
+
 #include <vector>
 #include <sstream>
 #include <fstream>
@@ -97,12 +99,37 @@ void sum_into_vector(size_t num_indices,
 
   std::vector<Scalar>& vec_coefs = vec.coefs;
 
-  for(size_t i=0; i<num_indices; ++i) {
-    if (indices[i] < first || indices[i] > last) continue;
-    size_t idx = indices[i] - first;
+  while( true ) {
+	const int tm_status = _xbegin();
 
-    #pragma omp atomic
-    vec_coefs[idx] += coefs[i];
+	switch( tm_status ) {
+	case _XBEGIN_STARTED:
+		for(size_t i=0; i<num_indices; ++i) {
+                       	if (indices[i] < first || indices[i] > last)
+                               	continue;
+
+                       	size_t idx = indices[i] - first;
+                       	vec_coefs[idx] += coefs[i];
+               	}
+
+               	_xend();
+               	break;
+	case _XABORT_RETRY:
+		continue;
+
+	default:
+		for(size_t i=0; i<num_indices; ++i) {
+                       	if (indices[i] < first || indices[i] > last)
+                               	continue;
+
+                       	size_t idx = indices[i] - first;
+                       	#pragma omp atomic
+                       	vec_coefs[idx] += coefs[i];
+               	}
+		break;
+	}
+
+	break;
   }
 }
 

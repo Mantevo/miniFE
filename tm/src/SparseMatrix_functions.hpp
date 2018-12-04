@@ -28,6 +28,8 @@
 // ************************************************************************
 //@HEADER
 
+#include <immintrin.h>
+
 #include <cstddef>
 #include <vector>
 #include <set>
@@ -148,16 +150,39 @@ sum_into_row(int row_len,
              const GlobalOrdinal* input_indices,
              const Scalar* input_coefs)
 {
-  for(size_t i=0; i<num_inputs; ++i) {
-    GlobalOrdinal* loc = std::lower_bound(row_indices, row_indices+row_len,
+	while( true ) {
+		const int tm_status = _xbegin();
+
+		switch( tm_status ) {
+		case _XBEGIN_STARTED:
+			for(size_t i=0; i<num_inputs; ++i) {
+               			GlobalOrdinal* loc = std::lower_bound(row_indices, row_indices+row_len,
                                           input_indices[i]);
-    if (loc-row_indices < row_len && *loc == input_indices[i]) {
-//if(flag && *loc==6)
-//std::cout<<"  ("<<*loc<<":"<<row_coefs[loc-row_indices]<<" += "<<input_coefs[i]<<")"<<std::endl;
-      #pragma omp atomic
-      row_coefs[loc-row_indices] += input_coefs[i];
-    }
-  }
+		               	if (loc-row_indices < row_len && *loc == input_indices[i]) {
+		                       	row_coefs[loc-row_indices] += input_coefs[i];
+                		}
+          		}
+
+			_xend();
+			break;
+
+		case _XABORT_RETRY:
+			continue;
+
+		default:
+			for(size_t i=0; i<num_inputs; ++i) {
+                		GlobalOrdinal* loc = std::lower_bound(row_indices, row_indices+row_len,
+                                          input_indices[i]);
+		                if (loc-row_indices < row_len && *loc == input_indices[i]) {
+		                       	#pragma omp atomic
+		                        row_coefs[loc-row_indices] += input_coefs[i];
+                		}
+          		}
+			break;
+		}
+
+		break;
+	}
 }
 
 template<typename MatrixType>
