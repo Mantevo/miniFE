@@ -523,11 +523,11 @@ impose_dirichlet(typename MatrixType::ScalarType prescribed_value,
 
   impose_dirichlet_functorA<MatrixType,VectorType,typename MatrixType::HostMirror::device_type> fA(prescribed_value,A,b,bc_rows);
   Kokkos::parallel_for("impose_dirichlet_A<Host>",bc_rows.size(),fA);
-  MatrixType::device_type::fence();
+  typename MatrixType::device_type().fence();
 
   impose_dirichlet_functorB<MatrixType,VectorType,typename MatrixType::HostMirror::device_type> fB(prescribed_value,A,b,bc_rows);
   Kokkos::parallel_for("impose_dirichlet_B<Host>",A.rows.size(),fB);
-  MatrixType::device_type::fence();
+  typename MatrixType::device_type().fence();
 }
 
 static timer_type exchtime = 0;
@@ -548,7 +548,7 @@ void matvec(MatrixType& A, VectorType& x, VectorType& y)
   exchange_externals(A, x);
 
   MV_Multiply(y.coefs.d_view,A.mat,x.coefs.d_view);
-  MatrixType::device_type::fence();
+  typename MatrixType::device_type().fence();
 }
 
 }//namespace miniFE

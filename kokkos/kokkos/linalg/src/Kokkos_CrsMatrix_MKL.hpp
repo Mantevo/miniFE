@@ -77,11 +77,11 @@ bool MV_Multiply_DoMKL(typename Kokkos::Impl::enable_if<Kokkos::Impl::is_same<T,
   char matdescra[6] = "GLNC0";
   char transa = 'N';
   int m = A.numRows();
-  int n = x.dimension_1();
+  int n = x.extent(1);
   int k = A.numCols();
-  double* x_ptr = (double*)x.ptr_on_device();
-  double* y_ptr = (double*)y.ptr_on_device();
-  if(x.dimension_1()>1) {
+  double* x_ptr = (double*)x.data();
+  double* y_ptr = (double*)y.data();
+  if(x.extent(1)>1) {
     Impl::PhysicalLayout layout_x(x);
     Impl::PhysicalLayout layout_y(y);
     if((layout_x.layout_type!=layout_x.Right) || layout_y.layout_type!=layout_y.Right) return false;
@@ -97,8 +97,8 @@ bool MV_Multiply_DoMKL(typename Kokkos::Impl::enable_if<Kokkos::Impl::is_same<T,
                &m, &n, &k,
                &s_a,
                matdescra,
-               A.values.ptr_on_device(),
-               A.graph.entries.ptr_on_device(),
+               A.values.data(),
+               A.graph.entries.data(),
                (int*) &A.graph.row_map(0),
                (int*) &A.graph.row_map(1),
                x_ptr,
@@ -111,8 +111,8 @@ bool MV_Multiply_DoMKL(typename Kokkos::Impl::enable_if<Kokkos::Impl::is_same<T,
                  &m, &k,
                  &s_a,
                  matdescra,
-                 A.values.ptr_on_device(),
-                 A.graph.entries.ptr_on_device(),
+                 A.values.data(),
+                 A.graph.entries.data(),
                  (int*) &A.graph.row_map(0),
                  (int*) &A.graph.row_map(1),
                  x_ptr,
@@ -131,11 +131,11 @@ bool MV_Multiply_DoMKL(typename Kokkos::Impl::enable_if<Kokkos::Impl::is_same<T,
   int stride_y = layout_y.stride[0];
   char transa = 'N';
   int m = A.numRows();
-  int n = x.dimension_1();
+  int n = x.extent(1);
   int k = A.numCols();
-  float* x_ptr = (float*)x.ptr_on_device();
-  float* y_ptr = (float*)y.ptr_on_device();
-  if(x.dimension_1()>1) {
+  float* x_ptr = (float*)x.data();
+  float* y_ptr = (float*)y.data();
+  if(x.extent(1)>1) {
 
     Impl::PhysicalLayout layout_x(x);
     Impl::PhysicalLayout layout_y(y);
@@ -145,8 +145,8 @@ bool MV_Multiply_DoMKL(typename Kokkos::Impl::enable_if<Kokkos::Impl::is_same<T,
                &m, &n, &k,
                &s_a,
                matdescra,
-               A.values.ptr_on_device(),
-               A.graph.entries.ptr_on_device(),
+               A.values.data(),
+               A.graph.entries.data(),
                (int*) &A.graph.row_map(0),
                (int*) &A.graph.row_map(1),
                x_ptr,
@@ -159,8 +159,8 @@ bool MV_Multiply_DoMKL(typename Kokkos::Impl::enable_if<Kokkos::Impl::is_same<T,
               &m, &k,
               &s_a,
               matdescra,
-              A.values.ptr_on_device(),
-              A.graph.entries.ptr_on_device(),
+              A.values.data(),
+              A.graph.entries.data(),
               (int*) &A.graph.row_map(0),
               (int*) &A.graph.row_map(1),
               x_ptr,

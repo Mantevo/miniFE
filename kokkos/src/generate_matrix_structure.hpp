@@ -150,7 +150,7 @@ generate_matrix_structure(const simple_mesh_description<typename MatrixType::Glo
   struct generate_matrix_structure_functor<MatrixType,host_device_type> functor(mesh,&A);
 
   Kokkos::parallel_for("generate_matrix_structure<Host>",functor.box_dims[0]*functor.box_dims[1]*functor.box_dims[2],functor);
-  host_device_type::fence();
+  host_device_type().fence();
 
   for(int i=0;i<functor.row_offsets.size()-1;i++) {
 	functor.row_offsets[i+1]+=functor.row_offsets[i];

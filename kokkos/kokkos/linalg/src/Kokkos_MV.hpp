@@ -89,8 +89,8 @@ RVector MV_MulScalar( const RVector & r, const typename Kokkos::View<DataType,Ar
     MV_MulScalarFunctorSelf<aVector,XVector> op ;
 	op.m_x = x ;
 	op.m_a = a ;
-	op.n = x.dimension(1);
-	Kokkos::parallel_for("MV_MulScalar",x.dimension(0) , op );
+	op.n = x.extent(1);
+	Kokkos::parallel_for("MV_MulScalar",x.extent(0) , op );
 	return r;
   }
 
@@ -98,8 +98,8 @@ RVector MV_MulScalar( const RVector & r, const typename Kokkos::View<DataType,Ar
   op.m_r = r ;
   op.m_x = x ;
   op.m_a = a ;
-  op.n = x.dimension(1);
-  Kokkos::parallel_for("MV_MulScalar",x.dimension(0) , op );
+  op.n = x.extent(1);
+  Kokkos::parallel_for("MV_MulScalar",x.extent(0) , op );
   return r;
 }
 
@@ -152,8 +152,8 @@ RVector MV_MulScalar( const RVector & r, const typename XVector::value_type &a, 
     MV_MulScalarFunctorSelf<typename XVector::value_type,XVector> op ;
 	op.m_x = x ;
 	op.m_a = a ;
-	op.n = x.dimension(1);
-	Kokkos::parallel_for("MV_MulScalar",x.dimension(0) , op );
+	op.n = x.extent(1);
+	Kokkos::parallel_for("MV_MulScalar",x.extent(0) , op );
 	return r;
   }
 
@@ -161,8 +161,8 @@ RVector MV_MulScalar( const RVector & r, const typename XVector::value_type &a, 
   op.m_r = r ;
   op.m_x = x ;
   op.m_a = a ;
-  op.n = x.dimension(1);
-  Kokkos::parallel_for("MV_MulScalar",x.dimension(0) , op );
+  op.n = x.extent(1);
+  Kokkos::parallel_for("MV_MulScalar",x.extent(0) , op );
   return r;
 }
 /*------------------------------------------------------------------------------------------
@@ -456,8 +456,8 @@ RVector MV_AddUnroll( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddUnroll<1,1>", x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddUnroll<1,1>", x.extent(0) , op );
      return r;
    }
    if(a==1&&b==-1) {
@@ -467,8 +467,8 @@ RVector MV_AddUnroll( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddUnroll<1,-1>",  x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddUnroll<1,-1>",  x.extent(0) , op );
      return r;
    }
    if(a==-1&&b==1) {
@@ -478,8 +478,8 @@ RVector MV_AddUnroll( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddUnroll<-1,1>",  x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddUnroll<-1,1>",  x.extent(0) , op );
      return r;
    }
    if(a==-1&&b==-1) {
@@ -489,8 +489,8 @@ RVector MV_AddUnroll( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddUnroll<-1,-1>",  x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddUnroll<-1,-1>",  x.extent(0) , op );
      return r;
    }
    if(a*a!=1&&b==1) {
@@ -500,8 +500,8 @@ RVector MV_AddUnroll( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddUnroll<2,1>",  x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddUnroll<2,1>",  x.extent(0) , op );
      return r;
    }
    if(a*a!=1&&b==-1) {
@@ -511,8 +511,8 @@ RVector MV_AddUnroll( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddUnroll<2,-1>",  x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddUnroll<2,-1>",  x.extent(0) , op );
      return r;
    }
    if(a==1&&b*b!=1) {
@@ -522,8 +522,8 @@ RVector MV_AddUnroll( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddUnroll<1,2>",  x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddUnroll<1,2>",  x.extent(0) , op );
      return r;
    }
    if(a==-1&&b*b!=1) {
@@ -533,8 +533,8 @@ RVector MV_AddUnroll( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddUnroll<-1,2>",  x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddUnroll<-1,2>",  x.extent(0) , op );
      return r;
    }
    MV_AddUnrollFunctor<RVector,aVector,XVector,bVector,YVector,2,2,UNROLL> op ;
@@ -543,8 +543,8 @@ RVector MV_AddUnroll( const RVector & r,const aVector &av,const XVector & x,
    op.m_y = y ;
    op.m_a = av ;
    op.m_b = bv ;
-   op.n = x.dimension(1);
-   Kokkos::parallel_for("MV_AddUnroll<2,2>",  x.dimension(0) , op );
+   op.n = x.extent(1);
+   Kokkos::parallel_for("MV_AddUnroll<2,2>",  x.extent(0) , op );
 
    return r;
 }
@@ -554,7 +554,7 @@ RVector MV_AddUnroll( const RVector & r,const aVector &av,const XVector & x,
 		const bVector &bv, const YVector & y,
 		int a=2,int b=2)
 {
-	switch (x.dimension(1)){
+	switch (x.extent(1)){
       case 1: MV_AddUnroll<RVector, aVector, XVector, bVector, YVector, 1>( r,av,x,bv,y,a,b);
 	          break;
       case 2: MV_AddUnroll<RVector, aVector, XVector, bVector, YVector, 2>( r,av,x,bv,y,a,b);
@@ -604,8 +604,8 @@ RVector MV_AddVector( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddVector<1,1>", x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddVector<1,1>", x.extent(0) , op );
      return r;
    }
    if(a==1&&b==-1) {
@@ -615,8 +615,8 @@ RVector MV_AddVector( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddVector<1,-1>", x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddVector<1,-1>", x.extent(0) , op );
      return r;
    }
    if(a==-1&&b==1) {
@@ -626,8 +626,8 @@ RVector MV_AddVector( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddVector<-1,1>", x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddVector<-1,1>", x.extent(0) , op );
      return r;
    }
    if(a==-1&&b==-1) {
@@ -637,8 +637,8 @@ RVector MV_AddVector( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddVector<-1,-1>",  x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddVector<-1,-1>",  x.extent(0) , op );
      return r;
    }
    if(a*a!=1&&b==1) {
@@ -648,8 +648,8 @@ RVector MV_AddVector( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddVector<2,1>", x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddVector<2,1>", x.extent(0) , op );
      return r;
    }
    if(a*a!=1&&b==-1) {
@@ -659,8 +659,8 @@ RVector MV_AddVector( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddVector<2,-1>", x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddVector<2,-1>", x.extent(0) , op );
      return r;
    }
    if(a==1&&b*b!=1) {
@@ -670,8 +670,8 @@ RVector MV_AddVector( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddVector<1,2>", x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddVector<1,2>", x.extent(0) , op );
      return r;
    }
    if(a==-1&&b*b!=1) {
@@ -681,8 +681,8 @@ RVector MV_AddVector( const RVector & r,const aVector &av,const XVector & x,
      op.m_y = y ;
      op.m_a = av ;
      op.m_b = bv ;
-     op.n = x.dimension(1);
-     Kokkos::parallel_for("MV_AddVector<-1,2>", x.dimension(0) , op );
+     op.n = x.extent(1);
+     Kokkos::parallel_for("MV_AddVector<-1,2>", x.extent(0) , op );
      return r;
    }
    MV_AddVectorFunctor<RVector,aVector,XVector,bVector,YVector,2,2> op ;
@@ -691,8 +691,8 @@ RVector MV_AddVector( const RVector & r,const aVector &av,const XVector & x,
    op.m_y = y ;
    op.m_a = av ;
    op.m_b = bv ;
-   op.n = x.dimension(1);
-   Kokkos::parallel_for("MV_AddVector<2,2>", x.dimension(0) , op );
+   op.n = x.extent(1);
+   Kokkos::parallel_for("MV_AddVector<2,2>", x.extent(0) , op );
 
    return r;
 }
@@ -703,10 +703,10 @@ RVector MV_Add( const RVector & r,const aVector &av,const XVector & x,
 		int a=2,int b=2)
 {
 
-	if(x.dimension(1)>16)
+	if(x.extent(1)>16)
 		return MV_AddVector( r,av,x,bv,y,a,b);
 
-	if(x.dimension_1()==1) {
+	if(x.extent(1)==1) {
     typedef View<typename RVector::value_type*,typename RVector::device_type> RVector1D;
     typedef View<typename XVector::const_value_type*,typename XVector::device_type> XVector1D;
     typedef View<typename YVector::const_value_type*,typename YVector::device_type> YVector1D;
@@ -724,7 +724,7 @@ RVector MV_Add( const RVector & r,const aVector &av,const XVector & x,
 template<class RVector,class XVector,class YVector>
 RVector MV_Add( const RVector & r, const XVector & x, const YVector & y)
 {
-  if(x.dimension_1()==1) {
+  if(x.extent(1)==1) {
     typedef View<typename RVector::value_type*,typename RVector::device_type> RVector1D;
     typedef View<typename XVector::const_value_type*,typename XVector::device_type> XVector1D;
     typedef View<typename YVector::const_value_type*,typename YVector::device_type> YVector1D;
@@ -744,7 +744,7 @@ RVector MV_Add( const RVector & r, const XVector & x, const YVector & y)
 template<class RVector,class XVector,class bVector, class YVector>
 RVector MV_Add( const RVector & r, const XVector & x, const bVector & bv, const YVector & y )
 {
-  if(x.dimension_1()==1) {
+  if(x.extent(1)==1) {
     typedef View<typename RVector::value_type*,typename RVector::device_type> RVector1D;
     typedef View<typename XVector::const_value_type*,typename XVector::device_type> XVector1D;
     typedef View<typename YVector::const_value_type*,typename YVector::device_type> YVector1D;
@@ -847,9 +847,9 @@ template<class rVector, class XVector, class YVector>
 rVector MV_Dot(const rVector &r, const XVector & x, const YVector & y, int n = -1)
 {
     typedef typename XVector::size_type            size_type;
-	  const size_type numVecs = x.dimension(1);
+	  const size_type numVecs = x.extent(1);
 
-	  if(n<0) n = x.dimension_0();
+	  if(n<0) n = x.extent(0);
     if(numVecs>16){
 
         MV_DotProduct_Right_FunctorVector<XVector,YVector> op;
@@ -1041,7 +1041,7 @@ RVector V_MulScalar( const RVector & r, const typename Kokkos::View<DataType,Arg
     V_MulScalarFunctorSelf<aVector,XVector> op ;
 	op.m_x = x ;
 	op.m_a = a ;
-	Kokkos::parallel_for("MV_MulScalarSelf", x.dimension(0) , op );
+	Kokkos::parallel_for("MV_MulScalarSelf", x.extent(0) , op );
 	return r;
   }
 
@@ -1049,7 +1049,7 @@ RVector V_MulScalar( const RVector & r, const typename Kokkos::View<DataType,Arg
   op.m_r = r ;
   op.m_x = x ;
   op.m_a = a ;
-  Kokkos::parallel_for("MV_MulScalar", x.dimension(0) , op );
+  Kokkos::parallel_for("MV_MulScalar", x.extent(0) , op );
   return r;
 }
 
@@ -1094,7 +1094,7 @@ RVector V_MulScalar( const RVector & r, const typename XVector::value_type &a, c
     V_MulScalarFunctorSelf<typename XVector::const_value_type,XVector> op ;
 	op.m_x = x ;
 	op.m_a = a ;
-	Kokkos::parallel_for("MV_MulScalarSelf", x.dimension(0) , op );
+	Kokkos::parallel_for("MV_MulScalarSelf", x.extent(0) , op );
 	return r;
   }
 
@@ -1102,7 +1102,7 @@ RVector V_MulScalar( const RVector & r, const typename XVector::value_type &a, c
   op.m_r = r ;
   op.m_x = x ;
   op.m_a = a ;
-  Kokkos::parallel_for("MV_MulScalar", x.dimension(0) , op );
+  Kokkos::parallel_for("MV_MulScalar", x.extent(0) , op );
   return r;
 }
 
@@ -1174,11 +1174,11 @@ template<class RVector, class XVector, class YVector, int doalpha, int dobeta>
 RVector V_AddVector( const RVector & r,const typename XVector::value_type &av,const XVector & x,
 		const typename XVector::value_type &bv, const YVector & y,int n=-1)
 {
-  if(n == -1) n = x.dimension_0();
-  if(r.ptr_on_device()==x.ptr_on_device() && doalpha == 1) {
+  if(n == -1) n = x.extent(0);
+  if(r.data()==x.data() && doalpha == 1) {
     V_AddVectorSelfFunctor<RVector,YVector,dobeta> f(r,bv,y);
     parallel_for("V_AddVectorSelf",n,f);
-  } else if(r.ptr_on_device()==y.ptr_on_device() && dobeta == 1) {
+  } else if(r.data()==y.data() && dobeta == 1) {
     V_AddVectorSelfFunctor<RVector,XVector,doalpha> f(r,av,x);
     parallel_for("V_AddVectorSelf",n,f);
   } else {
@@ -1288,7 +1288,7 @@ template<class XVector, class YVector>
 typename XVector::value_type V_Dot( const XVector & x, const YVector & y, int n = -1)
 {
   V_DotFunctor<XVector,YVector> f(x,y);
-  if (n<0) n = x.dimension_0();
+  if (n<0) n = x.extent(0);
   typename XVector::non_const_value_type ret_val;
   parallel_reduce("V_Dot",n,f,ret_val);
   return ret_val;

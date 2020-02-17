@@ -295,7 +295,7 @@ public:
   /// better solution though.
 
   //! Type of the graph structure of the sparse matrix.
-  typedef Kokkos::StaticCrsGraph<OrdinalType, Kokkos::LayoutLeft, Device,SizeType> StaticCrsGraphType;
+  typedef Kokkos::StaticCrsGraph<OrdinalType, Kokkos::LayoutLeft, Device,void,SizeType> StaticCrsGraphType;
 
   //! Type of column indices in the sparse matrix.
   typedef typename StaticCrsGraphType::entries_type index_type;
@@ -429,9 +429,9 @@ public:
              OrdinalType ncols,
              values_type vals,
              StaticCrsGraphType graph_) :
-    _numRows (graph_.row_map.dimension_0()-1),
+    _numRows (graph_.row_map.extent(0)-1),
     _numCols (ncols),
-    _nnz (graph_.entries.dimension_0()),
+    _nnz (graph_.entries.extent(0)),
     values(vals),
     graph(graph_)
   {
@@ -1196,11 +1196,11 @@ struct MV_MultiplyFunctor {
 				     const int& doalpha,
 				     const int& dobeta)
     {
-      typename DomainVector::size_type numVecs = x.dimension_1();
+      typename DomainVector::size_type numVecs = x.extent(1);
       typename DomainVector::size_type numRows = A.numRows();
       typename DomainVector::size_type numCols = A.numCols();
 
-      if (y.dimension_1() != numVecs) {
+      if (y.extent(1) != numVecs) {
 	std::ostringstream msg;
 	msg << "Error in CRSMatrix - Vector Multiply (y = by + aAx): 2nd dimensions of y and x do not match\n";
 	msg << "\t Labels are: y(" << y.label() << ") b("
@@ -1208,10 +1208,10 @@ struct MV_MultiplyFunctor {
 	    << alphav.label() << ") x("
 	    << A.values.label() << ") x("
 	    << x.label() << ")\n";
-	msg << "\t Dimensions are: y(" << y.dimension_0() << "," << y.dimension_1() << ") x(" << x.dimension_0() << "," << x.dimension_1() << ")\n";
+	msg << "\t Dimensions are: y(" << y.extent(0) << "," << y.extent(1) << ") x(" << x.extent(0) << "," << x.extent(1) << ")\n";
 	Impl::throw_runtime_exception( msg.str() );
       }
-      if (numRows > y.dimension_0()) {
+      if (numRows > y.extent(0)) {
 	std::ostringstream msg;
 	msg << "Error in CRSMatrix - Vector Multiply (y = by + aAx): dimensions of y and A do not match\n";
   msg << "\t Labels are: y(" << y.label() << ") b("
@@ -1219,10 +1219,10 @@ struct MV_MultiplyFunctor {
       << alphav.label() << ") x("
       << A.values.label() << ") x("
       << x.label() << ")\n";
-	msg << "\t Dimensions are: y(" << y.dimension_0() << "," << y.dimension_1() << ") A(" << A.numCols() << "," << A.numRows() << ")\n";
+	msg << "\t Dimensions are: y(" << y.extent(0) << "," << y.extent(1) << ") A(" << A.numCols() << "," << A.numRows() << ")\n";
 	Impl::throw_runtime_exception( msg.str() );
       }
-      if (numCols > x.dimension_0()) {
+      if (numCols > x.extent(0)) {
 	std::ostringstream msg;
 	msg << "Error in CRSMatrix - Vector Multiply (y = by + aAx): dimensions of x and A do not match\n";
   msg << "\t Labels are: y(" << y.label() << ") b("
@@ -1230,11 +1230,11 @@ struct MV_MultiplyFunctor {
       << alphav.label() << ") x("
       << A.values.label() << ") x("
       << x.label() << ")\n";
-	msg << "\t Dimensions are: x(" << x.dimension_0() << "," << x.dimension_1() << ") A(" << A.numCols() << "," << A.numRows() << ")\n";
+	msg << "\t Dimensions are: x(" << x.extent(0) << "," << x.extent(1) << ") A(" << A.numCols() << "," << A.numRows() << ")\n";
 	Impl::throw_runtime_exception( msg.str() );
       }
       if (dobeta==2) {
-	if (betav.dimension_0()!=numVecs) {
+	if (betav.extent(0)!=numVecs) {
 	  std::ostringstream msg;
 	  msg << "Error in CRSMatrix - Vector Multiply (y = by + aAx): 2nd dimensions of y and b do not match\n";
 	  msg << "\t Labels are: y(" << y.label() << ") b("
@@ -1242,12 +1242,12 @@ struct MV_MultiplyFunctor {
 	      << alphav.label() << ") x("
 	      << A.values.label() << ") x("
 	      << x.label() << ")\n";
-	  msg << "\t Dimensions are: y(" << y.dimension_0() << "," << y.dimension_1() << ") b(" << betav.dimension_0() << ")\n";
+	  msg << "\t Dimensions are: y(" << y.extent(0) << "," << y.extent(1) << ") b(" << betav.extent(0) << ")\n";
 	  Impl::throw_runtime_exception( msg.str() );
 	}
       }
       if(doalpha==2) {
-	if(alphav.dimension_0()!=numVecs) {
+	if(alphav.extent(0)!=numVecs) {
 	  std::ostringstream msg;
 	  msg << "Error in CRSMatrix - Vector Multiply (y = by + aAx): 2nd dimensions of x and b do not match\n";
 	  msg << "\t Labels are: y(" << y.label() << ") b("
@@ -1255,7 +1255,7 @@ struct MV_MultiplyFunctor {
 	      << alphav.label() << ") x("
 	      << A.values.label() << ") x("
 	      << x.label() << ")\n";
-	  msg << "\t Dimensions are: x(" << x.dimension_0() << "," << x.dimension_1() << ") b(" << betav.dimension_0() << ")\n";
+	  msg << "\t Dimensions are: x(" << x.extent(0) << "," << x.extent(1) << ") b(" << betav.extent(0) << ")\n";
 	  Impl::throw_runtime_exception( msg.str() );
 	}
       }
@@ -1299,7 +1299,7 @@ struct MV_MultiplyFunctor {
 	    int doalpha,
 	    int dobeta>
   void
-  MV_Multiply (typename Kokkos::Impl::enable_if<DomainVector::Rank == 2, const CoeffVector1>::type& betav,
+  MV_Multiply (typename std::enable_if<DomainVector::Rank == 2, const CoeffVector1>::type& betav,
 	       const RangeVector &y,
 	       const CoeffVector2 &alphav,
 	       const TCrsMatrix &A,
@@ -1355,7 +1355,7 @@ struct MV_MultiplyFunctor {
       op.m_y = y ;
       op.beta = betav;
       op.alpha = alphav;
-      op.n = x.dimension(1);
+      op.n = x.extent(1);
       Kokkos::parallel_for("SPMV n-rhs",nrow*ThreadsPerRow<typename TCrsMatrix::device_type,typename TCrsMatrix::non_const_value_type>::value , op);
 
 #else // NOT KOKKOS_FAST_COMPILE
@@ -1363,7 +1363,7 @@ struct MV_MultiplyFunctor {
       MV_MultiplyFunctor<RangeVectorType, CrsMatrixType, DomainVectorType, CoeffVector1Type, CoeffVector2Type, 2, 2,
 	          ThreadsPerRow<typename TCrsMatrix::device_type, typename TCrsMatrix::non_const_value_type>::value> op ;
 
-      int numVecs = x.dimension_1();
+      int numVecs = x.extent(1);
       CoeffVector1 beta = betav;
       CoeffVector2 alpha = alphav;
 
@@ -1395,7 +1395,7 @@ struct MV_MultiplyFunctor {
       op.m_y = y;
       op.beta = beta;
       op.alpha = alpha;
-      op.n = x.dimension_1();
+      op.n = x.extent(1);
       Kokkos::parallel_for ("SPMV n-rhs",nrow * ThreadsPerRow<typename TCrsMatrix::device_type,
                             typename TCrsMatrix::non_const_value_type>::value, op);
 #endif // KOKKOS_FAST_COMPILE
@@ -1410,7 +1410,7 @@ struct MV_MultiplyFunctor {
 	   int doalpha,
 	   int dobeta>
   void
-  MV_Multiply (typename Kokkos::Impl::enable_if<DomainVector::Rank == 1, const CoeffVector1>::type& betav,
+  MV_Multiply (typename std::enable_if<DomainVector::Rank == 1, const CoeffVector1>::type& betav,
 	       const RangeVector &y,
 	       const CoeffVector2 &alphav,
 	       const TCrsMatrix& A,
@@ -1466,7 +1466,7 @@ struct MV_MultiplyFunctor {
       op.m_y = y ;
       op.beta = betav;
       op.alpha = alphav;
-      op.n = x.dimension(1);
+      op.n = x.extent(1);
       Kokkos::parallel_for ("SPMV",nrow * ThreadsPerRow<typename TCrsMatrix::device_type,
                             typename TCrsMatrix::non_const_value_type>::value, op);
 
@@ -1476,7 +1476,7 @@ struct MV_MultiplyFunctor {
                                CoeffVector1Type, CoeffVector2Type, 2, 2,
 	ThreadsPerRow<typename CrsMatrixType::device_type, typename CrsMatrixType::non_const_value_type>::value> op;
 
-      int numVecs = x.dimension_1();
+      int numVecs = x.extent(1);
       CoeffVector1 beta = betav;
       CoeffVector2 alpha = alphav;
 
@@ -1506,7 +1506,7 @@ struct MV_MultiplyFunctor {
       op.m_y = y ;
       op.beta = beta;
       op.alpha = alpha;
-      op.n = x.dimension_1();
+      op.n = x.extent(1);
       Kokkos::parallel_for ("SPMV",nrow * ThreadsPerRow<typename TCrsMatrix::device_type,
                             typename TCrsMatrix::non_const_value_type>::value, op);
 #endif // KOKKOS_FAST_COMPILE
@@ -1636,7 +1636,7 @@ struct MV_MultiplyFunctor {
 #endif // KOKKOS_USE_MKL
     typedef Kokkos::View<typename RangeVector::value_type*, typename RangeVector::device_type> aVector;
     aVector a;
-    const int numVecs = x.dimension_1();
+    const int numVecs = x.extent(1);
 
     if (s_a == -1) {
       return MV_Multiply (a, y, a, A, x, 0, -1);
@@ -1672,7 +1672,7 @@ struct MV_MultiplyFunctor {
     typedef Kokkos::View<typename RangeVector::value_type*, typename RangeVector::device_type> aVector;
     aVector a;
     aVector b;
-    int numVecs = x.dimension_1();
+    int numVecs = x.extent(1);
 
     if(numVecs==1)
     if (s_b == 0) {

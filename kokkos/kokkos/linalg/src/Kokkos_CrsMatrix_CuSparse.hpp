@@ -86,12 +86,12 @@ MV_Multiply_DoCuSparse (typename Kokkos::Impl::enable_if<Kokkos::Impl::is_same<T
                     A.numRows(), A.numCols(),  A.nnz(),
                     &s_a,
                     A.cusparse_descr,
-                    A.values.ptr_on_device(),
-                    (const int*) A.graph.row_map.ptr_on_device(),
-                    A.graph.entries.ptr_on_device(),
-                    x.ptr_on_device(),
+                    A.values.data(),
+                    (const int*) A.graph.row_map.data(),
+                    A.graph.entries.data(),
+                    x.data(),
                     &s_b,
-                    y.ptr_on_device());
+                    y.data());
   } else {
     Impl::PhysicalLayout layout_x (x);
     Impl::PhysicalLayout layout_y (y);
@@ -99,16 +99,16 @@ MV_Multiply_DoCuSparse (typename Kokkos::Impl::enable_if<Kokkos::Impl::is_same<T
       return false;
     }
     cusparseDcsrmm (A.cusparse_handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
-                    A.numRows(), x.dimension_1(), A.numCols(),  A.nnz(),
+                    A.numRows(), x.extent(1), A.numCols(),  A.nnz(),
                     &s_a,
                     A.cusparse_descr,
-                    A.values.ptr_on_device(),
-                    (const int*) A.graph.row_map.ptr_on_device(),
-                    A.graph.entries.ptr_on_device(),
-                    x.ptr_on_device(),
+                    A.values.data(),
+                    (const int*) A.graph.row_map.data(),
+                    A.graph.entries.data(),
+                    x.data(),
                     layout_x.stride[1],
                     &s_b,
-                    y.ptr_on_device(),
+                    y.data(),
                     layout_y.stride[1]);
   }
   return true;
@@ -118,32 +118,32 @@ template<typename T, class RangeVector,class CrsMatrix,class DomainVector>
 bool MV_Multiply_DoCuSparse(typename Kokkos::Impl::enable_if<Kokkos::Impl::is_same<T,float>::value, float  >::type s_b
                 ,const RangeVector & y, float s_a,
                 const CrsMatrix & A , const DomainVector & x) {
-        if(x.dimension_1()==1) {
+        if(x.extent(1)==1) {
         cusparseScsrmv(A.cusparse_handle,CUSPARSE_OPERATION_NON_TRANSPOSE,
                        A.numRows(), A.numCols(),  A.nnz(),
                        &s_a,
                        A.cusparse_descr,
-                       A.values.ptr_on_device(),
-                       (const int*) A.graph.row_map.ptr_on_device(),
-                       A.graph.entries.ptr_on_device(),
-                       x.ptr_on_device(),
+                       A.values.data(),
+                       (const int*) A.graph.row_map.data(),
+                       A.graph.entries.data(),
+                       x.data(),
                        &s_b,
-                       y.ptr_on_device());
+                       y.data());
         } else {
           Impl::PhysicalLayout layout_x(x);
           Impl::PhysicalLayout layout_y(y);
           if((layout_x.layout_type!=layout_x.Left) || layout_y.layout_type!=layout_y.Left) return false;
           cusparseScsrmm(A.cusparse_handle,CUSPARSE_OPERATION_NON_TRANSPOSE,
-                               A.numRows(), x.dimension_1(), A.numCols(),  A.nnz(),
+                               A.numRows(), x.extent(1), A.numCols(),  A.nnz(),
                                &s_a,
                                A.cusparse_descr,
-                               A.values.ptr_on_device(),
-                               (const int*) A.graph.row_map.ptr_on_device(),
-                               A.graph.entries.ptr_on_device(),
-                               x.ptr_on_device(),
+                               A.values.data(),
+                               (const int*) A.graph.row_map.data(),
+                               A.graph.entries.data(),
+                               x.data(),
                                layout_x.stride[1],
                                &s_b,
-                               y.ptr_on_device(),
+                               y.data(),
                                layout_y.stride[1]);     
   }
   return true;

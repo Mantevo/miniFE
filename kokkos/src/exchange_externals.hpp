@@ -113,9 +113,9 @@ exchange_externals(MatrixType& A,
 
   Kokkos::vector<Scalar,Kokkos::DefaultExecutionSpace>& x_coefs = x.coefs;
 #ifndef GPU_MPI
-  Scalar* x_external = x_coefs.h_view.ptr_on_device() + local_nrow;
+  Scalar* x_external = x_coefs.h_view.data() + local_nrow;
 #else
-  Scalar* x_external = x_coefs.d_view.ptr_on_device() + local_nrow;
+  Scalar* x_external = x_coefs.d_view.data() + local_nrow;
 #endif
   MPI_Datatype mpi_dtype = TypeTraits<Scalar>::mpi_type();
 
@@ -158,9 +158,9 @@ exchange_externals(MatrixType& A,
 
 #ifndef GPU_MPI
   send_buffer.device_to_host();
-  Scalar* s_buffer = send_buffer.h_view.ptr_on_device();
+  Scalar* s_buffer = send_buffer.h_view.data();
 #else
-  Scalar* s_buffer = send_buffer.d_view.ptr_on_device();
+  Scalar* s_buffer = send_buffer.d_view.data();
 #endif
 
   for(int i=0; i<num_neighbors; ++i) {

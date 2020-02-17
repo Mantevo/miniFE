@@ -29,7 +29,7 @@ MAKEFILE_PATH := $(subst Makefile,,$(abspath $(lastword $(MAKEFILE_LIST))))
 
 MINIFE_PATH = ${MAKEFILE_PATH}..
 
-KOKKOS_PATH ?= ../kokkos
+KOKKOS_PATH ?= ${HOME}/Kokkos/kokkos
 KOKKOS_PATH_INC ?= ${KOKKOS_PATH}
 
 all:generate_info miniFE.x

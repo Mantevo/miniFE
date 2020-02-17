@@ -83,14 +83,14 @@ struct MatrixInitOp<miniFE::CSRMatrix<MINIFE_SCALAR,MINIFE_LOCAL_ORDINAL,MINIFE_
      dest_coefs(&matrix.packed_coefs[0]),
      n(matrix.rows.size())
   {
-    if (matrix.packed_cols.capacity() != matrix.packed_coefs.capacity()) {
-      std::cout<<"Warning, packed_cols.capacity ("<<matrix.packed_cols.capacity()<<") != "
-        << "packed_coefs.capacity ("<<matrix.packed_coefs.capacity()<<")"<<std::endl;
+    if (matrix.packed_cols.span() != matrix.packed_coefs.span()) {
+      std::cout<<"Warning, packed_cols.span ("<<matrix.packed_cols.span()<<") != "
+        << "packed_coefs.span ("<<matrix.packed_coefs.span()<<")"<<std::endl;
     }
 
     size_t nnz = row_offsets_vec[n];
-    if (matrix.packed_cols.capacity() < nnz) {
-      std::cout<<"Warning, packed_cols.capacity ("<<matrix.packed_cols.capacity()<<") < "
+    if (matrix.packed_cols.span() < nnz) {
+      std::cout<<"Warning, packed_cols.span ("<<matrix.packed_cols.span()<<") < "
         " nnz ("<<nnz<<")"<<std::endl;
     }
 

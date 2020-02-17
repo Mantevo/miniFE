@@ -145,7 +145,7 @@ void
     Kokkos::V_Add(w.coefs.d_view,x.coefs.d_view,beta,y.coefs.d_view,size);
   else
     Kokkos::V_Add(w.coefs.d_view,alpha,x.coefs.d_view,beta,y.coefs.d_view,size);
-  device_device_type::fence();
+  device_device_type().fence();
 }
 
 //-----------------------------------------------------------
