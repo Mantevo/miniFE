@@ -15,3 +15,7 @@ MiniFE is licensed under the LGPL-3. See LICENSE for more information.
 ## Additional Information
 
 Please see the README.FIRST which accompanies the MiniFE source code.
+
+For more details about miniFE and a comparison with an application code, please see the following reference:
+
+P.T. Lin, M.A. Heroux, R.F. Barrett, and A.B. Williams, "Assessing a mini-application as a performance proxy for a finite element method engineering application," Concurrency and Computation: Practice and Experience, 27(17):5374–5389, 2015. DOI: 10.1002/cpe.3587
