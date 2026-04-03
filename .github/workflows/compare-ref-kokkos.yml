@@ -1,0 +1,96 @@
+name: Compare Ref And Kokkos Implementations
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  serial-openmpi:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        case:
+          - nx: 1
+            ny: 1
+            nz: 2
+          - nx: 17
+            ny: 3
+            nz: 5
+          - nx: 20
+            ny: 30
+            nz: 40
+    name: serial-openmpi ${{ matrix.case.nx }} x ${{ matrix.case.ny }} x ${{ matrix.case.nz }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check Out Kokkos
+        uses: actions/checkout@v6
+        with:
+          repository: kokkos/kokkos
+          ref: 3.7.02
+          path: external/kokkos
+
+      - name: Install MPI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openmpi-bin libopenmpi-dev
+
+      - name: Build ref with MINIFE_DEBUG
+        env:
+          JOBS: 2
+        run: |
+          make -C ref/src realclean
+          make -C ref/src -j$(nproc) CXXFLAGS='-O3 -DMINIFE_DEBUG'
+
+      - name: Run ref debug cases
+        run: |
+          rm -f ./*.mtx.* ./*.vec.*
+          ./ref/src/miniFE.x nx=${{ matrix.case.nx }} ny=${{ matrix.case.ny }} nz=${{ matrix.case.nz }}
+          mpirun -np 2 ./ref/src/miniFE.x nx=${{ matrix.case.nx }} ny=${{ matrix.case.ny }} nz=${{ matrix.case.nz }}
+
+      - name: Collect ref dumps
+        run: |
+          rm -rf ref-dumps
+          mkdir -p ref-dumps
+          find . -maxdepth 1 -type f \
+            \( -name '*.mtx.*' -o -name '*.vec.*' \) \
+            -exec cp {} ref-dumps/ \;
+          ls -l ref-dumps
+          test -n "$(find ref-dumps -maxdepth 1 -type f | head -n 1)"
+
+      - name: Build kokkos with MINIFE_DEBUG
+        env:
+          JOBS: 2
+        run: |
+          make -C kokkos/src realclean KOKKOS_PATH="${GITHUB_WORKSPACE}/external/kokkos"
+          make -C kokkos/src -j$(nproc) \
+            KOKKOS_PATH="${GITHUB_WORKSPACE}/external/kokkos" \
+            MINIFE_INFO=0 \
+            MINIFE_KERNELS=0 \
+            CXXFLAGS='-O3 -DMINIFE_DEBUG'
+
+      - name: Run kokkos debug cases
+        run: |
+          rm -f ./*.mtx.* ./*.vec.*
+          ./kokkos/src/miniFE.x nx=${{ matrix.case.nx }} ny=${{ matrix.case.ny }} nz=${{ matrix.case.nz }}
+          mpirun --oversubscribe -np 2 ./kokkos/src/miniFE.x nx=${{ matrix.case.nx }} ny=${{ matrix.case.ny }} nz=${{ matrix.case.nz }}
+
+      - name: Collect kokkos dumps
+        run: |
+          rm -rf kokkos-dumps
+          mkdir -p kokkos-dumps
+          find . -maxdepth 1 -type f \
+            \( -name '*.mtx.*' -o -name '*.vec.*' \) \
+            -exec cp {} kokkos-dumps/ \;
+          ls -l kokkos-dumps
+          test -n "$(find kokkos-dumps -maxdepth 1 -type f | head -n 1)"
+
+      - name: Compare ref and kokkos dumps
+        run: |
+          ls ref-dumps
+          ls kokkos-dumps
+          diff -ru ref-dumps kokkos-dumps
+          echo "ref/ and kokkos/ MINIFE_DEBUG dumps match"
