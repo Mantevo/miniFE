@@ -49,7 +49,7 @@ jobs:
         run: |
           rm -f ./*.mtx.* ./*.vec.*
           ./ref/src/miniFE.x nx=${{ matrix.case.nx }} ny=${{ matrix.case.ny }} nz=${{ matrix.case.nz }}
-          mpirun -np 2 ./ref/src/miniFE.x nx=${{ matrix.case.nx }} ny=${{ matrix.case.ny }} nz=${{ matrix.case.nz }}
+          mpirun --oversubscribe -np 2 ./ref/src/miniFE.x nx=${{ matrix.case.nx }} ny=${{ matrix.case.ny }} nz=${{ matrix.case.nz }}
 
       - name: Collect ref dumps
         run: |
