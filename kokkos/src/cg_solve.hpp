@@ -159,7 +159,7 @@ cg_solve(OperatorType& A,
       oldrtrans = rtrans;
       TICK(); rtrans = dot(r, r); TOCK(tDOT);
       magnitude_type beta = rtrans/oldrtrans;
-      TICK(); waxpby(beta, p, one, r, p); TOCK(tWAXPY);
+      TICK(); waxpby(one, r, beta, p, p); TOCK(tWAXPY);
     }
     normr = std::sqrt(rtrans);
     if (myproc == 0 && (k%print_freq==0 || k==max_iter)) {
@@ -219,4 +219,3 @@ cg_solve(OperatorType& A,
 }//namespace miniFE
 
 #endif
-

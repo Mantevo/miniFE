@@ -65,7 +65,6 @@ void write_vector(const std::string& filename,
 
   typedef typename VectorType::ScalarType ScalarType;
 
-  const std::vector<ScalarType>& coefs = vec.coefs;
   for(int p=0; p<numprocs; ++p) {
     if (p == myproc) {
       if (p == 0) {
@@ -74,7 +73,7 @@ void write_vector(const std::string& filename,
   
       typename VectorType::GlobalOrdinalType first = vec.startIndex;
       for(size_t i=0; i<vec.local_size; ++i) {
-        ofs << first+i << " " << coefs[i] << std::endl;
+        ofs << first+i << " " << vec.coefs[i] << std::endl;
       }
     }
 #ifdef HAVE_MPI
@@ -191,4 +190,3 @@ typename TypeTraits<typename Vector::ScalarType>::magnitude_type
 }//namespace miniFE
 
 #endif
-
