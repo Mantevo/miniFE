@@ -251,9 +251,10 @@ make_local_matrix(MatrixType& A)
   //
   int MPI_MY_TAG = 99;
 
+  std::vector<GlobalOrdinal> tmp_recv_buffer(num_send_neighbors);
   std::vector<MPI_Request> request(num_send_neighbors);
   for(int i=0; i<num_send_neighbors; ++i) {
-    MPI_Irecv(&tmp_buffer[i], 1, mpi_dtype, MPI_ANY_SOURCE, MPI_MY_TAG,
+    MPI_Irecv(&tmp_recv_buffer[i], 1, mpi_dtype, MPI_ANY_SOURCE, MPI_MY_TAG,
               MPI_COMM_WORLD, &request[i]);
   }
 
